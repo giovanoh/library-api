@@ -1,44 +1,36 @@
-var builder = WebApplication.CreateBuilder(args);
+using Library.API.Domain.Repositories;
+using Library.API.Domain.Services;
+using Library.API.Infrastructure.Contexts;
+using Library.API.Infrastructure.Repositories;
+using Library.API.Infrastructure.Services;
+
+using Microsoft.EntityFrameworkCore;
+
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddControllers();
+builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
 
-var app = builder.Build();
+builder.Services.AddDbContext<ApiDbContext>(options => options.UseInMemoryDatabase("library-api-in-memory-database"));
 
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
+
+builder.Services.AddScoped<IAuthorService, AuthorService>();
+builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+WebApplication app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
 app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
-
+app.MapControllers();
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
