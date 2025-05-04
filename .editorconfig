@@ -1,0 +1,89 @@
+# .editorconfig para projetos .NET/C#
+root = true
+
+# Arquivos C#
+[*.cs]
+
+# Indentação e espaçamento
+indent_style = space
+indent_size = 4
+tab_width = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Codificação
+charset = utf-8-bom
+
+# Regras de formatação
+csharp_new_line_before_open_brace = all
+csharp_new_line_between_query_expression_clauses = true
+csharp_indent_case_contents = true
+csharp_indent_switch_labels = true
+csharp_indent_labels = flush_left
+
+# Uso de var
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_var_elsewhere = false:suggestion
+
+# Expressões lambda e locais
+csharp_style_expression_bodied_methods = true:suggestion
+csharp_style_expression_bodied_properties = true:suggestion
+csharp_style_expression_bodied_ctors = true:suggestion
+
+# Convenções de nomenclatura
+# Exemplo: campos privados em camelCase
+# (Ajuste conforme o padrão do seu time)
+dotnet_naming_rule.private_fields_should_be_camel_case.severity = suggestion
+dotnet_naming_rule.private_fields_should_be_camel_case.symbols = private_fields
+dotnet_naming_rule.private_fields_should_be_camel_case.style = camel_case
+
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+dotnet_naming_symbols.private_fields.required_modifiers =
+
+dotnet_naming_style.camel_case.capitalization = camel_case
+
+# Usar this. para membros de instância
+dotnet_style_qualification_for_field = false:suggestion
+dotnet_style_qualification_for_property = false:suggestion
+dotnet_style_qualification_for_method = false:suggestion
+dotnet_style_qualification_for_event = false:suggestion
+
+# Preferências de using
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = true
+
+# Preferência por interpolação de string
+csharp_style_prefer_interpolated_string = true:suggestion
+
+# Preferência por pattern matching
+csharp_style_pattern_matching_over_is_with_cast_check = true:suggestion
+csharp_style_pattern_matching_over_as_with_null_check = true:suggestion
+
+# Preferência por switch expression
+csharp_style_prefer_switch_expression = true:suggestion
+
+# Preferência por null propagation
+csharp_style_conditional_delegate_call = true:suggestion
+
+# Preferência por expression-bodied members
+csharp_style_expression_bodied_accessors = true:suggestion
+
+# Preferência por discard
+csharp_style_prefer_discard = true:suggestion
+
+# Preferência por default literal
+csharp_style_prefer_default_literal = true:suggestion
+
+# Preferência por tuple
+csharp_style_prefer_tuple_swap = true:suggestion
+
+# Preferência por static local function
+csharp_style_prefer_static_local_function = true:suggestion
+
+# Preferência por file-scoped namespace
+csharp_style_namespace_declarations = file_scoped:suggestion
+
+# Preferência por using global
+csharp_style_prefer_top_level_statements = true:suggestion 
