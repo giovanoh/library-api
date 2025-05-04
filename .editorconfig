@@ -32,17 +32,17 @@ csharp_style_expression_bodied_properties = true:suggestion
 csharp_style_expression_bodied_ctors = true:suggestion
 
 # Convenções de nomenclatura
-# Exemplo: campos privados em camelCase
-# (Ajuste conforme o padrão do seu time)
-dotnet_naming_rule.private_fields_should_be_camel_case.severity = suggestion
-dotnet_naming_rule.private_fields_should_be_camel_case.symbols = private_fields
-dotnet_naming_rule.private_fields_should_be_camel_case.style = camel_case
+# Exemplo: campos privados em camelCase com underscore (_)
+dotnet_naming_rule.private_fields_should_be_camel_case_with_underscore.severity = suggestion
+dotnet_naming_rule.private_fields_should_be_camel_case_with_underscore.symbols = private_fields
+dotnet_naming_rule.private_fields_should_be_camel_case_with_underscore.style = camel_case_with_underscore
 
 dotnet_naming_symbols.private_fields.applicable_kinds = field
 dotnet_naming_symbols.private_fields.applicable_accessibilities = private
 dotnet_naming_symbols.private_fields.required_modifiers =
 
-dotnet_naming_style.camel_case.capitalization = camel_case
+dotnet_naming_style.camel_case_with_underscore.capitalization = camel_case
+dotnet_naming_style.camel_case_with_underscore.required_prefix = _
 
 # Usar this. para membros de instância
 dotnet_style_qualification_for_field = false:suggestion
