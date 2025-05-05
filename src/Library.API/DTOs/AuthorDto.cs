@@ -1,9 +1,9 @@
 namespace Library.API.DTOs;
 
-public class AuthorDto
+public record AuthorDto
 {
-    public int Id { get; set; }
-    public string? Name { get; set; }
-    public DateTime? BirthDate { get; set; }
-    public string? Biography { get; set; }
+    public int Id { get; init; }
+    public string? Name { get; init; }
+    public DateTime? BirthDate { get; init; }
+    public string? Biography { get; init; }
 }

@@ -1,6 +1,7 @@
 using Library.API.Domain.Repositories;
 using Library.API.Domain.Services;
 using Library.API.Infrastructure.Contexts;
+using Library.API.Infrastructure.Factories;
 using Library.API.Infrastructure.Repositories;
 using Library.API.Infrastructure.Services;
 
@@ -12,7 +13,11 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = InvalidModelStateResponseFactory.Create;
+    });
 builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
 
 builder.Services.AddDbContext<ApiDbContext>(options => options.UseInMemoryDatabase("library-api-in-memory-database"));
