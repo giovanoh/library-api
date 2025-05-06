@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Library.API.DTOs.Response;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Library.API.Infrastructure.Factories;
 
@@ -7,20 +7,23 @@ public static class InvalidModelStateResponseFactory
 {
     public static IActionResult Create(ActionContext context)
     {
-        var errorResponse = new ValidationErrorResponse();
+        var errors = new Dictionary<string, string[]>();
 
         foreach (var modelStateEntry in context.ModelState)
         {
-            foreach (var error in modelStateEntry.Value.Errors)
+            var errorMessages = new List<string>();
+            foreach (ModelError error in modelStateEntry.Value.Errors)
+                errorMessages.Add(error.ErrorMessage);
+
+            if (errorMessages.Count > 0)
             {
-                errorResponse.Errors.Add(new ValidationError
-                {
-                    Field = modelStateEntry.Key,
-                    Message = error.ErrorMessage
-                });
+                errors.Add(modelStateEntry.Key, errorMessages.ToArray());
             }
         }
 
-        return new BadRequestObjectResult(errorResponse);
+        var instance = context.HttpContext.Request.Path + context.HttpContext.Request.QueryString;
+        var problemDetails = ApiProblemDetailsFactory.CreateValidationProblem(errors, instance);
+
+        return new BadRequestObjectResult(problemDetails);
     }
 } 
