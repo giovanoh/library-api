@@ -8,75 +8,74 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Library.API.Controllers;
 
-public class AuthorsController : ApiController
+public class BooksController : ApiController
 {
-    private readonly IAuthorService _authorService;
+    private readonly IBookService _bookService;
     private readonly IMapper _mapper;
 
-    public AuthorsController(IAuthorService authorService, IMapper mapper)
+    public BooksController(IBookService bookService, IMapper mapper)
     {
-        _authorService = authorService;
+        _bookService = bookService;
         _mapper = mapper;
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(IEnumerable<AuthorDto>), 200)]
+    [ProducesResponseType(typeof(IEnumerable<BookDto>), 200)]
     [ProducesResponseType(typeof(BadRequestObjectResult), 400)]
     [ProducesResponseType(typeof(ObjectResult), 500)]
     public async Task<IActionResult> GetAllAsync()
     {
-        var result = await _authorService.ListAsync();
-        if (!result.Success)   
+        var result = await _bookService.ListAsync();
+        if (!result.Success)
             return HandleErrorResponse(result);
 
-        var authorsDto = _mapper.Map<IEnumerable<AuthorDto>>(result.Model);
-        return Ok(authorsDto);
+        var booksDto = _mapper.Map<IEnumerable<BookDto>>(result.Model);
+        return Ok(booksDto);
     }
 
-    [HttpGet("{id}", Name = "GetAuthorById")]
-    [ProducesResponseType(typeof(AuthorDto), 200)]
+    [HttpGet("{id}")]
+    [ProducesResponseType(typeof(BookDto), 200)]
     [ProducesResponseType(typeof(NotFoundObjectResult), 404)]
     [ProducesResponseType(typeof(ObjectResult), 500)]
     public async Task<IActionResult> GetByIdAsync(int id)
     {
-        var result = await _authorService.FindByIdAsync(id);
+        var result = await _bookService.FindByIdAsync(id);
         if (!result.Success)
             return HandleErrorResponse(result);
 
-        var authorDto = _mapper.Map<AuthorDto>(result.Model);
-        return Ok(authorDto);
+        var bookDto = _mapper.Map<BookDto>(result.Model);
+        return Ok(bookDto);
     }
 
     [HttpPost]
-    [ProducesResponseType(typeof(AuthorDto), 201)]
+    [ProducesResponseType(typeof(BookDto), 201)]
     [ProducesResponseType(typeof(BadRequestObjectResult), 400)]
+    [ProducesResponseType(typeof(NotFoundObjectResult), 404)]
     [ProducesResponseType(typeof(ObjectResult), 500)]
-    public async Task<IActionResult> CreateAsync([FromBody] SaveAuthorDto saveAuthorDto)
+    public async Task<IActionResult> CreateAsync([FromBody] SaveBookDto saveBookDto)
     {
-        var author = _mapper.Map<Author>(saveAuthorDto);
-        var result = await _authorService.AddAsync(author);
-        
+        var book = _mapper.Map<Book>(saveBookDto);
+        var result = await _bookService.AddAsync(book);
         if (!result.Success)
             return HandleErrorResponse(result);
 
-        var authorDto = _mapper.Map<AuthorDto>(result.Model);
-        return CreatedAtRoute("GetAuthorById", new { id = authorDto.Id }, authorDto);
+        var bookDto = _mapper.Map<BookDto>(result.Model);
+        return CreatedAtAction(nameof(GetByIdAsync), new { id = bookDto.Id }, bookDto);
     }
 
     [HttpPut("{id}")]
-    [ProducesResponseType(typeof(AuthorDto), 200)]
+    [ProducesResponseType(typeof(BookDto), 200)]
     [ProducesResponseType(typeof(NotFoundObjectResult), 404)]
     [ProducesResponseType(typeof(ObjectResult), 500)]
-    public async Task<IActionResult> UpdateAsync(int id, [FromBody] SaveAuthorDto saveAuthorDto)
+    public async Task<IActionResult> UpdateAsync(int id, [FromBody] SaveBookDto saveBookDto)
     {
-        var author = _mapper.Map<Author>(saveAuthorDto);
-        var result = await _authorService.UpdateAsync(id, author);
-        
+        var book = _mapper.Map<Book>(saveBookDto);
+        var result = await _bookService.UpdateAsync(id, book);
         if (!result.Success)
             return HandleErrorResponse(result);
 
-        var authorDto = _mapper.Map<AuthorDto>(result.Model);
-        return Ok(authorDto);
+        var bookDto = _mapper.Map<BookDto>(result.Model);
+        return Ok(bookDto);
     }
 
     [HttpDelete("{id}")]
@@ -85,8 +84,7 @@ public class AuthorsController : ApiController
     [ProducesResponseType(typeof(ObjectResult), 500)]
     public async Task<IActionResult> DeleteAsync(int id)
     {
-        var result = await _authorService.DeleteAsync(id);
-        
+        var result = await _bookService.DeleteAsync(id);
         if (!result.Success)
             return HandleErrorResponse(result);
 

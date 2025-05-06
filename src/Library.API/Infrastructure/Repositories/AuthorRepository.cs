@@ -17,7 +17,7 @@ public class AuthorRepository : IAuthorRepository
     }
 
     public async Task<IEnumerable<Author>> ListAsync() {
-        return await _context.Authors.AsTracking().ToListAsync();
+        return await _context.Authors.AsNoTracking().ToListAsync();
     }
 
     public async Task<Author?> FindByIdAsync(int authorId) {
@@ -28,11 +28,11 @@ public class AuthorRepository : IAuthorRepository
         await _context.Authors.AddAsync(author);
     }
 
-    public void UpdateAsync(Author author) {
+    public void Update(Author author) {
         _context.Authors.Update(author);
     }
 
-    public void DeleteAsync(Author author) {
+    public void Delete(Author author) {
         _context.Authors.Remove(author);
     }
 }

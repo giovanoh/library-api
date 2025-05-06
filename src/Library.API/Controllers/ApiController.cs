@@ -5,17 +5,18 @@ namespace Library.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ApiController : ControllerBase
+public abstract class ApiController : ControllerBase
 {
     protected IActionResult HandleErrorResponse<T>(Response<T> response)
     {
+        var errorObject = new { message = response.Message };
         return response.Error switch
         {
-            ErrorType.NotFound => NotFound(response.Message),
-            ErrorType.ValidationError => BadRequest(response.Message),
-            ErrorType.Conflict => Conflict(response.Message),
-            ErrorType.DatabaseError => StatusCode(500, response.Message),
-            _ => BadRequest(response.Message)
+            ErrorType.NotFound => NotFound(errorObject),
+            ErrorType.ValidationError => BadRequest(errorObject),
+            ErrorType.Conflict => Conflict(errorObject),
+            ErrorType.DatabaseError => StatusCode(500, errorObject),
+            _ => BadRequest(errorObject)
         };
     }
 }

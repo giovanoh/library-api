@@ -10,5 +10,6 @@ public class DtoToModelProfile : Profile
     public DtoToModelProfile()
     {
         CreateMap<SaveAuthorDto, Author>();
+        CreateMap<SaveBookDto, Book>();
     }
 }
