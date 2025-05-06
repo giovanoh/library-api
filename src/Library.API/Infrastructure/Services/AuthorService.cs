@@ -6,17 +6,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Library.API.Infrastructure.Services;
 
-public class AuthorService : IAuthorService
+public class AuthorService : BaseService, IAuthorService
 {
     private readonly IAuthorRepository _authorRepository;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger<AuthorService> _logger;
 
     public AuthorService(IAuthorRepository authorRepository, IUnitOfWork unitOfWork, ILogger<AuthorService> logger)
+        : base(unitOfWork, logger)
     {
         _authorRepository = authorRepository;
-        _unitOfWork = unitOfWork;
-        _logger = logger;
     }
 
     public async Task<Response<IEnumerable<Author>>> ListAsync()
@@ -88,7 +85,7 @@ public class AuthorService : IAuthorService
 
             UpdateAuthorProperties(existingAuthor, author);
             
-            _authorRepository.UpdateAsync(existingAuthor);
+            _authorRepository.Update(existingAuthor);
             await SaveChangesAsync();
             
             return Response<Author>.Ok(existingAuthor);
@@ -117,7 +114,7 @@ public class AuthorService : IAuthorService
             if (existingAuthor == null)
                 return Response<Author>.NotFound($"Author with id {authorId} was not found.");
 
-            _authorRepository.DeleteAsync(existingAuthor);
+            _authorRepository.Delete(existingAuthor);
             await SaveChangesAsync();
             
             return Response<Author>.Ok(existingAuthor);
@@ -135,19 +132,6 @@ public class AuthorService : IAuthorService
             return Response<Author>.Fail(
                 "An unexpected error occurred while processing your request.", 
                 ErrorType.Unknown);
-        }
-    }
-
-    private async Task SaveChangesAsync()
-    {
-        try
-        {
-            await _unitOfWork.CompleteAsync();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error occurred while saving changes to database");
-            throw new DbUpdateException("Failed to save changes to the database.", ex);
         }
     }
 
