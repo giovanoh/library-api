@@ -3,6 +3,7 @@ using AutoMapper;
 using Library.API.Domain.Models;
 using Library.API.Domain.Services;
 using Library.API.DTOs;
+using Library.API.DTOs.Response;
 
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,9 +21,9 @@ public class AuthorsController : ApiController
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(IEnumerable<AuthorDto>), 200)]
-    [ProducesResponseType(typeof(BadRequestObjectResult), 400)]
-    [ProducesResponseType(typeof(ObjectResult), 500)]
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<AuthorDto>>), 200)]
+    [ProducesResponseType(typeof(ApiProblemDetails), 400)]
+    [ProducesResponseType(typeof(ApiProblemDetails), 500)]
     public async Task<IActionResult> GetAllAsync()
     {
         var result = await _authorService.ListAsync();
@@ -30,13 +31,13 @@ public class AuthorsController : ApiController
             return HandleErrorResponse(result);
 
         var authorsDto = _mapper.Map<IEnumerable<AuthorDto>>(result.Model);
-        return Ok(authorsDto);
+        return Success(authorsDto);
     }
 
     [HttpGet("{id}", Name = "GetAuthorById")]
-    [ProducesResponseType(typeof(AuthorDto), 200)]
-    [ProducesResponseType(typeof(NotFoundObjectResult), 404)]
-    [ProducesResponseType(typeof(ObjectResult), 500)]
+    [ProducesResponseType(typeof(ApiResponse<AuthorDto>), 200)]
+    [ProducesResponseType(typeof(ApiProblemDetails), 404)]
+    [ProducesResponseType(typeof(ApiProblemDetails), 500)]
     public async Task<IActionResult> GetByIdAsync(int id)
     {
         var result = await _authorService.FindByIdAsync(id);
@@ -44,13 +45,13 @@ public class AuthorsController : ApiController
             return HandleErrorResponse(result);
 
         var authorDto = _mapper.Map<AuthorDto>(result.Model);
-        return Ok(authorDto);
+        return Success(authorDto);
     }
 
     [HttpPost]
-    [ProducesResponseType(typeof(AuthorDto), 201)]
-    [ProducesResponseType(typeof(BadRequestObjectResult), 400)]
-    [ProducesResponseType(typeof(ObjectResult), 500)]
+    [ProducesResponseType(typeof(ApiResponse<AuthorDto>), 201)]
+    [ProducesResponseType(typeof(ApiProblemDetails), 400)]
+    [ProducesResponseType(typeof(ApiProblemDetails), 500)]
     public async Task<IActionResult> CreateAsync([FromBody] SaveAuthorDto saveAuthorDto)
     {
         var author = _mapper.Map<Author>(saveAuthorDto);
@@ -60,13 +61,13 @@ public class AuthorsController : ApiController
             return HandleErrorResponse(result);
 
         var authorDto = _mapper.Map<AuthorDto>(result.Model);
-        return CreatedAtRoute("GetAuthorById", new { id = authorDto.Id }, authorDto);
+        return Created("GetAuthorById", new { id = authorDto.Id }, authorDto);
     }
 
     [HttpPut("{id}")]
-    [ProducesResponseType(typeof(AuthorDto), 200)]
-    [ProducesResponseType(typeof(NotFoundObjectResult), 404)]
-    [ProducesResponseType(typeof(ObjectResult), 500)]
+    [ProducesResponseType(typeof(ApiResponse<AuthorDto>), 200)]
+    [ProducesResponseType(typeof(ApiProblemDetails), 404)]
+    [ProducesResponseType(typeof(ApiProblemDetails), 500)]
     public async Task<IActionResult> UpdateAsync(int id, [FromBody] SaveAuthorDto saveAuthorDto)
     {
         var author = _mapper.Map<Author>(saveAuthorDto);
@@ -76,13 +77,13 @@ public class AuthorsController : ApiController
             return HandleErrorResponse(result);
 
         var authorDto = _mapper.Map<AuthorDto>(result.Model);
-        return Ok(authorDto);
+        return Success(authorDto);
     }
 
     [HttpDelete("{id}")]
-    [ProducesResponseType(typeof(NoContentResult), 204)]
-    [ProducesResponseType(typeof(NotFoundObjectResult), 404)]
-    [ProducesResponseType(typeof(ObjectResult), 500)]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(typeof(ApiProblemDetails), 404)]
+    [ProducesResponseType(typeof(ApiProblemDetails), 500)]
     public async Task<IActionResult> DeleteAsync(int id)
     {
         var result = await _authorService.DeleteAsync(id);
