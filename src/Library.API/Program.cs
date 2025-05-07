@@ -6,6 +6,7 @@ using Library.API.Infrastructure.Repositories;
 using Library.API.Infrastructure.Services;
 
 using Microsoft.EntityFrameworkCore;
+
 using System.Text.Json.Serialization;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -44,3 +45,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.MapControllers();
 app.Run();
+
+// This partial class makes Program explicitly accessible for integration tests
+// with WebApplicationFactory<Program> in .NET 6+ minimal API applications
+public partial class Program { }

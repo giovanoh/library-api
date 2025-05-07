@@ -10,7 +10,8 @@ public record ApiResponse<T>
     [JsonPropertyName("meta")]
     public Dictionary<string, object>? Meta { get; init; }
 
-    private ApiResponse(T? data = default, Dictionary<string, object>? meta = null)
+    [JsonConstructor]
+    private ApiResponse(T data, Dictionary<string, object>? meta = null)
     {
         Data = data;
         Meta = meta;
