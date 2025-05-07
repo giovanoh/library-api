@@ -44,6 +44,17 @@ dotnet_naming_symbols.private_fields.required_modifiers =
 dotnet_naming_style.camel_case_with_underscore.capitalization = camel_case
 dotnet_naming_style.camel_case_with_underscore.required_prefix = _
 
+# Constantes em PascalCase
+dotnet_naming_rule.constants_should_be_pascal_case.severity = suggestion
+dotnet_naming_rule.constants_should_be_pascal_case.symbols = constants
+dotnet_naming_rule.constants_should_be_pascal_case.style = pascal_case
+
+dotnet_naming_symbols.constants.applicable_kinds = field
+dotnet_naming_symbols.constants.applicable_accessibilities = *
+dotnet_naming_symbols.constants.required_modifiers = const
+
+dotnet_naming_style.pascal_case.capitalization = pascal_case
+
 # Usar this. para membros de instância
 dotnet_style_qualification_for_field = false:suggestion
 dotnet_style_qualification_for_property = false:suggestion
@@ -86,4 +97,4 @@ csharp_style_prefer_static_local_function = true:suggestion
 csharp_style_namespace_declarations = file_scoped:suggestion
 
 # Preferência por using global
-csharp_style_prefer_top_level_statements = true:suggestion 
+csharp_style_prefer_top_level_statements = true:suggestion

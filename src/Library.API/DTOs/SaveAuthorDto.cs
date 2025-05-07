@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
+using Library.API.Validation;
+
 namespace Library.API.DTOs;
 
 public record SaveAuthorDto
@@ -9,6 +11,7 @@ public record SaveAuthorDto
     public string? Name { get; init; }
 
     [Required]
+    [PastDate]
     [DataType(DataType.Date)]
     public DateTime? BirthDate { get; init; }
 
