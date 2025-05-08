@@ -34,7 +34,7 @@ public class BooksController : ApiController
         return Success(booksDto);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id}", Name = "GetBookById")]
     [ProducesResponseType(typeof(ApiResponse<BookDto>), 200)]
     [ProducesResponseType(typeof(ApiProblemDetails), 404)]
     [ProducesResponseType(typeof(ApiProblemDetails), 500)]
@@ -61,7 +61,7 @@ public class BooksController : ApiController
             return HandleErrorResponse(result);
 
         var bookDto = _mapper.Map<BookDto>(result.Model);
-        return Created(nameof(GetByIdAsync), new { id = bookDto.Id }, bookDto);
+        return Created("GetBookById", new { id = bookDto.Id }, bookDto);
     }
 
     [HttpPut("{id}")]
