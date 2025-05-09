@@ -2,6 +2,7 @@ using FluentAssertions;
 
 using Library.API.Domain.Models;
 using Library.API.Infrastructure.Repositories;
+using Library.API.IntegrationTests.Fixtures;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -26,11 +27,10 @@ public class AuthorRepositoryTests : RepositoryTestBase
         // Act
         await authorRepository.AddAsync(author);
         await unitOfWork.CompleteAsync();
+        var result = await authorRepository.ListAsync();
 
         // Assert
-        var result = await authorRepository.ListAsync();
         result.Should().HaveCount(1);
-
         var retrievedAuthor = result.First();
         retrievedAuthor.Name.Should().Be(author.Name);
         retrievedAuthor.BirthDate.Should().Be(author.BirthDate);
@@ -42,26 +42,19 @@ public class AuthorRepositoryTests : RepositoryTestBase
     {
         // Arrange
         using var context = CreateInMemoryContext();
+        TestDataHelper.SeedAuthors(context);
         var authorRepository = new AuthorRepository(context);
         var unitOfWork = new UnitOfWork(context);
-        var author = new Author
-        {
-            Name = "Author 1",
-            BirthDate = new DateTime(1980, 1, 1),
-            Biography = "Author 1 is a software engineer."
-        };
 
         // Act
-        await authorRepository.AddAsync(author);
-        await unitOfWork.CompleteAsync();
+        var retrievedAuthor = await authorRepository.FindByIdAsync(1);
 
         // Assert
-        var retrievedAuthor = await authorRepository.FindByIdAsync(author.Id);
         retrievedAuthor.Should().NotBeNull();
-        retrievedAuthor.Id.Should().Be(author.Id);
-        retrievedAuthor.Name.Should().Be(author.Name);
-        retrievedAuthor.BirthDate.Should().Be(author.BirthDate);
-        retrievedAuthor.Biography.Should().Be(author.Biography);
+        retrievedAuthor.Id.Should().Be(1);
+        retrievedAuthor.Name.Should().Be("Author 1");
+        retrievedAuthor.BirthDate.Should().Be(new DateTime(1980, 1, 1));
+        retrievedAuthor.Biography.Should().Be("Author 1 is a software engineer.");
     }
 
     [Fact]
@@ -83,18 +76,13 @@ public class AuthorRepositoryTests : RepositoryTestBase
     {
         // Arrange
         using var context = CreateInMemoryContext();
+        TestDataHelper.SeedAuthors(context);
         var authorRepository = new AuthorRepository(context);
-        var unitOfWork = new UnitOfWork(context);
-        var author = new Author
-        {
-            Name = "Author 1",
-            BirthDate = new DateTime(1980, 1, 1),
-            Biography = "Author 1 is a software engineer."
-        };
+        var unitOfWork = new UnitOfWork(context);        
 
         // Act
-        await authorRepository.AddAsync(author);
-        await unitOfWork.CompleteAsync();
+        var author = await authorRepository.FindByIdAsync(1);
+        author.Should().NotBeNull();
         author.Name = "Updated Author";
         author.BirthDate = new DateTime(1985, 1, 1);
         author.Biography = "Updated biography.";
@@ -140,23 +128,16 @@ public class AuthorRepositoryTests : RepositoryTestBase
     {
         // Arrange
         using var context = CreateInMemoryContext();
+        TestDataHelper.SeedAuthors(context);
         var authorRepository = new AuthorRepository(context);
         var unitOfWork = new UnitOfWork(context);
-        var author = new Author
-        {
-            Name = "Author 1",
-            BirthDate = new DateTime(1980, 1, 1),
-            Biography = "Author 1 is a software engineer."
-        };
-        await authorRepository.AddAsync(author);
-        await unitOfWork.CompleteAsync();
-
         // Act
-        authorRepository.Delete(author);
+        var author = await authorRepository.FindByIdAsync(1);
+        authorRepository.Delete(author!);
         await unitOfWork.CompleteAsync();
 
         // Assert
-        var deletedAuthor = await authorRepository.FindByIdAsync(author.Id);
+        var deletedAuthor = await authorRepository.FindByIdAsync(1);
         deletedAuthor.Should().BeNull();
     }
 

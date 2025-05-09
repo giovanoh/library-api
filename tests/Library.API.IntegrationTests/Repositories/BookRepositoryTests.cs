@@ -71,7 +71,7 @@ public class BookRepositoryTests : RepositoryTestBase
         result.Id.Should().Be(1);
         result.Title.Should().Be("Book 1");
         result.AuthorId.Should().Be(1);
-        result.Description.Should().Be("Description 1");
+        result.Description.Should().Be("Book 1 is a book about software engineering.");
         result.ReleaseDate.Should().Be(new DateTime(2000, 1, 1));
     }
 
@@ -129,7 +129,7 @@ public class BookRepositoryTests : RepositoryTestBase
             Id = 999,
             Title = "Book 1",
             AuthorId = 999,
-            Description = "Book 1 is a book about software engineering.",
+            Description = "Book 999 is a book about software engineering.",
             ReleaseDate = new DateTime(2020, 1, 1)
         };
 

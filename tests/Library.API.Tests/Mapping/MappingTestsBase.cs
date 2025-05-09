@@ -17,7 +17,7 @@ public class MappingTestsBase
         Mapper = configuration.CreateMapper();
     }
 
-    [Fact] // private to not run on every test
+    [Fact]
     private void Should_Have_Valid_Configuration()
     {
         Mapper.ConfigurationProvider.AssertConfigurationIsValid();

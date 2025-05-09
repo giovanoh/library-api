@@ -15,7 +15,7 @@ public class BookMappingTests : MappingTestsBase
         {
             Id = 1,
             Title = "Book 1",
-            Description = "Book 1 is a science fiction book"
+            Description = "Book 1 is a book about software engineering."
         };
 
         // Act
@@ -35,7 +35,7 @@ public class BookMappingTests : MappingTestsBase
         var bookDto = new SaveBookDto
         {
             Title = "Book 1",
-            Description = "Book 1 is a science fiction book"
+            Description = "Book 1 is a book about software engineering."
         };
 
         // Act

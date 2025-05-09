@@ -13,14 +13,14 @@ public static class TestDataHelper
         {
             Id = 1,
             Name = "Author 1",
-            Biography = "Biography 1",
+            Biography = "Author 1 is a software engineer.",
             BirthDate = new DateTime(1980, 1, 1),
         },
         new Author
         {
             Id = 2,
             Name = "Author 2",
-            Biography = "Biography 2",
+            Biography = "Author 2 is a software engineer.",
             BirthDate = new DateTime(1990, 1, 1),
         }
     ];
@@ -59,7 +59,7 @@ public static class TestDataHelper
         {
             Id = 1,
             Title = "Book 1",
-            Description = "Description 1",
+            Description = "Book 1 is a book about software engineering.",
             AuthorId = 1,
             ReleaseDate = new DateTime(2000, 1, 1),
         },
@@ -67,7 +67,7 @@ public static class TestDataHelper
         {
             Id = 2,
             Title = "Book 2",
-            Description = "Description 2",
+            Description = "Book 2 is a book about software engineering.",
             AuthorId = 2,
             ReleaseDate = new DateTime(2010, 1, 1),
         }
