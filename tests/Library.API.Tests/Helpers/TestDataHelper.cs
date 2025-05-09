@@ -21,4 +21,24 @@ public static class TestDataHelper
             Biography = "Author 2 is a software engineer."
         }
     ];
+
+    public static List<Book> Books =>
+    [
+        new Book
+        {
+            Id = 1,
+            Title = "Book 1",
+            Description = "Book 1 is a book about software engineering.",
+            AuthorId = 1,
+            ReleaseDate = new DateTime(2000, 1, 1),
+        },
+        new Book
+        {
+            Id = 2,
+            Title = "Book 2",
+            Description = "Book 2 is a book about software engineering.",
+            AuthorId = 2,
+            ReleaseDate = new DateTime(2010, 1, 1),
+        }
+    ];    
 } 
