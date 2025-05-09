@@ -78,7 +78,7 @@ public class AuthorRepositoryTests : RepositoryTestBase
         using var context = CreateInMemoryContext();
         TestDataHelper.SeedAuthors(context);
         var authorRepository = new AuthorRepository(context);
-        var unitOfWork = new UnitOfWork(context);        
+        var unitOfWork = new UnitOfWork(context);
 
         // Act
         var author = await authorRepository.FindByIdAsync(1);

@@ -25,7 +25,7 @@ public class AuthorServiceTests
         _loggerMock = new Mock<ILogger<AuthorService>>();
     }
 
-    private AuthorService CreateService() => 
+    private AuthorService CreateService() =>
         new AuthorService(_authorRepositoryMock.Object, _unitOfWorkMock.Object, _loggerMock.Object);
 
     [Fact]
@@ -86,7 +86,7 @@ public class AuthorServiceTests
     {
         // Arrange
         AuthorService service = CreateService();
-        Author author = TestDataHelper.Authors[0];  
+        Author author = TestDataHelper.Authors[0];
         _authorRepositoryMock.Setup(repo => repo.FindByIdAsync(author.Id)).ReturnsAsync(author);
 
         // Act
@@ -100,7 +100,7 @@ public class AuthorServiceTests
         result.Error.Should().BeNull();
         result.Message.Should().BeNull();
 
-        _authorRepositoryMock.Verify(repo => repo.FindByIdAsync(author.Id), Times.Once);        
+        _authorRepositoryMock.Verify(repo => repo.FindByIdAsync(author.Id), Times.Once);
     }
 
     [Fact]
@@ -120,9 +120,9 @@ public class AuthorServiceTests
         result.Model.Should().BeNull();
         result.Error.Should().Be(ErrorType.NotFound);
         result.Message.Should().NotBeNull();
-        result.Message.Should().Be($"Author with id {author.Id} was not found.");  
+        result.Message.Should().Be($"Author with id {author.Id} was not found.");
 
-        _authorRepositoryMock.Verify(repo => repo.FindByIdAsync(author.Id), Times.Once);        
+        _authorRepositoryMock.Verify(repo => repo.FindByIdAsync(author.Id), Times.Once);
     }
 
     [Fact]
@@ -244,7 +244,7 @@ public class AuthorServiceTests
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()
             ),
             Times.Once
-        );  
+        );
     }
 
     [Fact]
@@ -269,7 +269,7 @@ public class AuthorServiceTests
         result.Message.Should().BeNull();
 
         _authorRepositoryMock.Verify(repo => repo.Update(author), Times.Once);
-        _authorRepositoryMock.Verify(repo => repo.FindByIdAsync(author.Id), Times.Once);        
+        _authorRepositoryMock.Verify(repo => repo.FindByIdAsync(author.Id), Times.Once);
         _unitOfWorkMock.Verify(uow => uow.CompleteAsync(), Times.Once);
     }
 
@@ -329,7 +329,7 @@ public class AuthorServiceTests
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()
             ),
             Times.Once
-        );  
+        );
     }
 
     [Fact]
@@ -363,7 +363,7 @@ public class AuthorServiceTests
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()
             ),
             Times.Once
-        );  
+        );
     }
 
     [Fact]
@@ -449,7 +449,7 @@ public class AuthorServiceTests
             ),
             Times.Once
         );
-    }   
+    }
 
     [Fact]
     public async Task DeleteAsync_ShouldReturnError_WhenUnexpectedErrorOccurs()
@@ -461,13 +461,13 @@ public class AuthorServiceTests
         _authorRepositoryMock.Setup(repo => repo.Delete(author)).Throws(new Exception("Unexpected error"));
 
         // Act
-        Response<Author> result = await service.DeleteAsync(author.Id); 
+        Response<Author> result = await service.DeleteAsync(author.Id);
 
         // Assert
         result.Should().NotBeNull();
         result.Success.Should().BeFalse();
         result.Model.Should().BeNull();
-        result.Error.Should().Be(ErrorType.Unknown);    
+        result.Error.Should().Be(ErrorType.Unknown);
         result.Message.Should().NotBeNull();
         result.Message.Should().Be("An unexpected error occurred while processing your request.");
 
