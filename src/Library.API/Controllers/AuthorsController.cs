@@ -27,7 +27,7 @@ public class AuthorsController : ApiController
     public async Task<IActionResult> GetAllAsync()
     {
         var result = await _authorService.ListAsync();
-        if (!result.Success)   
+        if (!result.Success)
             return HandleErrorResponse(result);
 
         var authorsDto = _mapper.Map<IEnumerable<AuthorDto>>(result.Model);

@@ -62,7 +62,7 @@ public class BooksControllerTest(LibraryApiFactory factory) : IntegrationTestBas
         apiResponse.Data.Should().NotBeNull();
         apiResponse.Data.Id.Should().Be(bookId);
         apiResponse.Data.Title.Should().Be("Book 1");
-        apiResponse.Data.Description.Should().Be("Description 1");
+        apiResponse.Data.Description.Should().Be("Book 1 is a book about software engineering.");
         apiResponse.Data.ReleaseDate.Should().Be(new DateTime(2000, 1, 1));
         apiResponse.Data.AuthorId.Should().Be(1);
         apiResponse.Data.AuthorName.Should().Be("Author 1");

@@ -16,7 +16,7 @@ public class AuthorMappingTests : MappingTestsBase
             Id = 1,
             Name = "Author 1",
             BirthDate = new DateTime(1980, 1, 1),
-            Biography = "Author 1 is a science fiction author"
+            Biography = "Author 1 is a software engineer."
         };
 
         // Act
@@ -38,7 +38,7 @@ public class AuthorMappingTests : MappingTestsBase
         {
             Name = "Author 1",
             BirthDate = new DateTime(1980, 1, 1),
-            Biography = "Author 1 is a science fiction author"
+            Biography = "Author 1 is a software engineer."
         };
 
         // Act

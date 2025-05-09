@@ -17,25 +17,19 @@ public class LibraryApiFactory : WebApplicationFactory<Program>
         builder.UseEnvironment("Testing");
         builder.ConfigureServices(services =>
         {
-            // Encontra o registro do DbContext
             var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(ApiDbContext));
             if (descriptor != null)
             {
-                // Remove o registro original
                 services.Remove(descriptor);
-
-                // Adiciona o DbContext em memória com nome único por instância
                 services.AddDbContext<ApiDbContext>(options =>
                 {
                     options.UseInMemoryDatabase(_databaseName);
                 });
             }
 
-            // Aqui você pode adicionar dados de teste ao banco
             var sp = services.BuildServiceProvider();
             using var scope = sp.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
-
             try
             {
                 db.Database.EnsureCreated();
