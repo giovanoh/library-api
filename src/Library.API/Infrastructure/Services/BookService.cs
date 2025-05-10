@@ -27,9 +27,9 @@ public class BookService : BaseService, IBookService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while listing books");
+            _logger.LogError(ex, "Error occurred while listing books.");
             return Response<IEnumerable<Book>>.Fail(
-                "An error occurred while retrieving the books.",
+                "An error occurred while retrieving the books",
                 ErrorType.DatabaseError);
         }
     }
@@ -40,15 +40,15 @@ public class BookService : BaseService, IBookService
         {
             var book = await _bookRepository.FindByIdAsync(bookId);
             if (book == null)
-                return Response<Book>.NotFound($"Book with id {bookId} was not found.");
+                return Response<Book>.NotFound($"Book with id {bookId} was not found");
 
             return Response<Book>.Ok(book);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while finding book {BookId}", bookId);
+            _logger.LogError(ex, "Error occurred while finding book {BookId}.", bookId);
             return Response<Book>.Fail(
-                "An error occurred while retrieving the book.",
+                "An error occurred while retrieving the book",
                 ErrorType.DatabaseError);
         }
     }
@@ -59,7 +59,7 @@ public class BookService : BaseService, IBookService
         {
             var author = await _authorRepository.FindByIdAsync(book.AuthorId);
             if (author == null)
-                return Response<Book>.NotFound($"Author with id {book.AuthorId} was not found.");
+                return Response<Book>.NotFound($"Author with id {book.AuthorId} was not found");
 
             await _bookRepository.AddAsync(book);
             await SaveChangesAsync();
@@ -68,16 +68,16 @@ public class BookService : BaseService, IBookService
         }
         catch (DbUpdateException ex)
         {
-            _logger.LogError(ex, "Error occurred while saving book");
+            _logger.LogError(ex, "Error occurred while saving book.");
             return Response<Book>.Fail(
-                "An error occurred while saving the book.",
+                "An error occurred while saving the book",
                 ErrorType.DatabaseError);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unexpected error occurred while adding book");
+            _logger.LogError(ex, "Unexpected error occurred while adding book.");
             return Response<Book>.Fail(
-                "An unexpected error occurred while processing your request.",
+                "An unexpected error occurred while processing your request",
                 ErrorType.Unknown);
         }
     }
@@ -88,11 +88,11 @@ public class BookService : BaseService, IBookService
         {
             var existingBook = await _bookRepository.FindByIdAsync(bookId);
             if (existingBook == null)
-                return Response<Book>.NotFound($"Book with id {bookId} was not found.");
+                return Response<Book>.NotFound($"Book with id {bookId} was not found");
 
             var newAuthor = await _authorRepository.FindByIdAsync(book.AuthorId);
             if (newAuthor == null)
-                return Response<Book>.NotFound($"Author with id {book.AuthorId} was not found.");
+                return Response<Book>.NotFound($"Author with id {book.AuthorId} was not found");
 
             UpdateBookProperties(existingBook, book);
 
@@ -103,16 +103,16 @@ public class BookService : BaseService, IBookService
         }
         catch (DbUpdateException ex)
         {
-            _logger.LogError(ex, "Error occurred while updating book {BookId}", bookId);
+            _logger.LogError(ex, "Error occurred while updating book {BookId}.", bookId);
             return Response<Book>.Fail(
-                "An error occurred while updating the book.",
+                "An error occurred while updating the book",
                 ErrorType.DatabaseError);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unexpected error occurred while updating book {BookId}", bookId);
+            _logger.LogError(ex, "Unexpected error occurred while updating book {BookId}.", bookId);
             return Response<Book>.Fail(
-                "An unexpected error occurred while processing your request.",
+                "An unexpected error occurred while processing your request",
                 ErrorType.Unknown);
         }
     }
@@ -123,7 +123,7 @@ public class BookService : BaseService, IBookService
         {
             var book = await _bookRepository.FindByIdAsync(bookId);
             if (book == null)
-                return Response<Book>.NotFound($"Book with id {bookId} was not found.");
+                return Response<Book>.NotFound($"Book with id {bookId} was not found");
 
             _bookRepository.Delete(book);
             await SaveChangesAsync();
@@ -131,16 +131,16 @@ public class BookService : BaseService, IBookService
         }
         catch (DbUpdateException ex)
         {
-            _logger.LogError(ex, "Error occurred while deleting book {BookId}", bookId);
+            _logger.LogError(ex, "Error occurred while deleting book {BookId}.", bookId);
             return Response<Book>.Fail(
-                "An error occurred while deleting the book.",
+                "An error occurred while deleting the book",
                 ErrorType.DatabaseError);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unexpected error occurred while deleting book {BookId}", bookId);
+            _logger.LogError(ex, "Unexpected error occurred while deleting book {BookId}.", bookId);
             return Response<Book>.Fail(
-                "An unexpected error occurred while processing your request.",
+                "An unexpected error occurred while processing your request",
                 ErrorType.Unknown);
         }
     }

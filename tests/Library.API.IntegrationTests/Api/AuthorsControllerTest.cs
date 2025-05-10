@@ -219,7 +219,7 @@ public class AuthorsControllerTest(LibraryApiFactory factory) : IntegrationTestB
         apiResponse.Title.Should().Be("Resource Not Found");
         apiResponse.Status.Should().Be((int)HttpStatusCode.NotFound);
         apiResponse.Type.Should().Be("https://tools.ietf.org/html/rfc7231#section-6.5.4");
-        apiResponse.Detail.Should().Be($"Author with id {authorId} was not found.");
+        apiResponse.Detail.Should().Be($"Author with id {authorId} was not found");
         apiResponse.Instance.Should().Be(endpoint);
         apiResponse.Errors.Should().BeNull();
     }
@@ -288,7 +288,7 @@ public class AuthorsControllerTest(LibraryApiFactory factory) : IntegrationTestB
         apiResponse.Title.Should().Be("Resource Not Found");
         apiResponse.Status.Should().Be((int)HttpStatusCode.NotFound);
         apiResponse.Type.Should().Be("https://tools.ietf.org/html/rfc7231#section-6.5.4");
-        apiResponse.Detail.Should().Be($"Author with id {authorId} was not found.");
+        apiResponse.Detail.Should().Be($"Author with id {authorId} was not found");
         apiResponse.Instance.Should().Be(endpoint);
         apiResponse.Errors.Should().BeNull();
     }
