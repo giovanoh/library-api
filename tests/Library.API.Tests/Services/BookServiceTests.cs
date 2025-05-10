@@ -69,7 +69,7 @@ public class BookServiceTests
         result.Model.Should().BeNull();
         result.Error.Should().Be(ErrorType.DatabaseError);
         result.Message.Should().NotBeNull();
-        result.Message.Should().Be("An error occurred while retrieving the books.");
+        result.Message.Should().Be("An error occurred while retrieving the books");
 
         _bookRepositoryMock.Verify(repo => repo.ListAsync(), Times.Once);
         _loggerMock.Verify(
@@ -123,7 +123,7 @@ public class BookServiceTests
         result.Model.Should().BeNull();
         result.Error.Should().Be(ErrorType.NotFound);
         result.Message.Should().NotBeNull();
-        result.Message.Should().Be($"Book with id {book.Id} was not found.");
+        result.Message.Should().Be($"Book with id {book.Id} was not found");
 
         _bookRepositoryMock.Verify(repo => repo.FindByIdAsync(book.Id), Times.Once);
     }
@@ -145,7 +145,7 @@ public class BookServiceTests
         result.Model.Should().BeNull();
         result.Error.Should().Be(ErrorType.DatabaseError);
         result.Message.Should().NotBeNull();
-        result.Message.Should().Be("An error occurred while retrieving the book.");
+        result.Message.Should().Be("An error occurred while retrieving the book");
 
         _bookRepositoryMock.Verify(repo => repo.FindByIdAsync(book.Id), Times.Once);
         _loggerMock.Verify(
@@ -206,11 +206,48 @@ public class BookServiceTests
         result.Model.Should().BeNull();
         result.Error.Should().Be(ErrorType.DatabaseError);
         result.Message.Should().NotBeNull();
-        result.Message.Should().Be("An error occurred while saving the book.");
+        result.Message.Should().Be("An error occurred while saving the book");
 
         _bookRepositoryMock.Verify(repo => repo.AddAsync(book), Times.Once);
         _authorRepositoryMock.Verify(repo => repo.FindByIdAsync(book.AuthorId), Times.Once);
         _unitOfWorkMock.Verify(uow => uow.CompleteAsync(), Times.Never);
+        _loggerMock.Verify(
+            x => x.Log(
+                LogLevel.Error,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v!.ToString()!.Contains("Error occurred while saving book")),
+                It.IsAny<Exception>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()
+            ),
+            Times.Once
+        );
+    }
+
+    [Fact]
+    public async Task AddAsync_ShouldReturnError_WhenUnitOfWorkFails()
+    {
+        // Arrange
+        BookService service = CreateService();
+        Book book = TestDataHelper.Books[0];
+        book.Author = TestDataHelper.Authors.FirstOrDefault(a => a.Id == book.AuthorId)!;
+        _authorRepositoryMock.Setup(repo => repo.FindByIdAsync(book.AuthorId)).ReturnsAsync(book.Author);
+        _bookRepositoryMock.Setup(repo => repo.AddAsync(book)).Returns(Task.CompletedTask);
+        _unitOfWorkMock.Setup(uow => uow.CompleteAsync()).ThrowsAsync(new DbUpdateException("Unit of work error"));
+
+        // Act
+        Response<Book> result = await service.AddAsync(book);
+
+        // Assert   
+        result.Should().NotBeNull();
+        result.Success.Should().BeFalse();
+        result.Model.Should().BeNull();
+        result.Error.Should().Be(ErrorType.DatabaseError);
+        result.Message.Should().NotBeNull();
+        result.Message.Should().Be("An error occurred while saving the book");
+
+        _bookRepositoryMock.Verify(repo => repo.AddAsync(book), Times.Once);
+        _authorRepositoryMock.Verify(repo => repo.FindByIdAsync(book.AuthorId), Times.Once);
+        _unitOfWorkMock.Verify(uow => uow.CompleteAsync(), Times.Once);
         _loggerMock.Verify(
             x => x.Log(
                 LogLevel.Error,
@@ -242,7 +279,7 @@ public class BookServiceTests
         result.Model.Should().BeNull();
         result.Error.Should().Be(ErrorType.Unknown);
         result.Message.Should().NotBeNull();
-        result.Message.Should().Be("An unexpected error occurred while processing your request.");
+        result.Message.Should().Be("An unexpected error occurred while processing your request");
 
         _bookRepositoryMock.Verify(repo => repo.AddAsync(book), Times.Once);
         _authorRepositoryMock.Verify(repo => repo.FindByIdAsync(book.AuthorId), Times.Once);
@@ -251,7 +288,7 @@ public class BookServiceTests
             x => x.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v!.ToString()!.Contains("Unexpected error occurred while adding book")),
+                It.Is<It.IsAnyType>((v, t) => v!.ToString()!.Contains("Unexpected error occurred while adding book.")),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()
             ),
@@ -276,7 +313,7 @@ public class BookServiceTests
         result.Model.Should().BeNull();
         result.Error.Should().Be(ErrorType.NotFound);
         result.Message.Should().NotBeNull();
-        result.Message.Should().Be($"Author with id {book.AuthorId} was not found.");
+        result.Message.Should().Be($"Author with id {book.AuthorId} was not found");
 
         _authorRepositoryMock.Verify(repo => repo.FindByIdAsync(book.AuthorId), Times.Once);
         _bookRepositoryMock.Verify(repo => repo.AddAsync(book), Times.Never);
@@ -328,7 +365,7 @@ public class BookServiceTests
         result.Model.Should().BeNull();
         result.Error.Should().Be(ErrorType.NotFound);
         result.Message.Should().NotBeNull();
-        result.Message.Should().Be($"Book with id {book.Id} was not found.");
+        result.Message.Should().Be($"Book with id {book.Id} was not found");
 
         _bookRepositoryMock.Verify(repo => repo.FindByIdAsync(book.Id), Times.Once);
         _bookRepositoryMock.Verify(repo => repo.Update(book), Times.Never);
@@ -353,7 +390,7 @@ public class BookServiceTests
         result.Model.Should().BeNull();
         result.Error.Should().Be(ErrorType.NotFound);
         result.Message.Should().NotBeNull();
-        result.Message.Should().Be($"Author with id {book.AuthorId} was not found.");
+        result.Message.Should().Be($"Author with id {book.AuthorId} was not found");
 
         _authorRepositoryMock.Verify(repo => repo.FindByIdAsync(book.AuthorId), Times.Once);
         _bookRepositoryMock.Verify(repo => repo.FindByIdAsync(book.Id), Times.Once);
@@ -381,7 +418,7 @@ public class BookServiceTests
         result.Model.Should().BeNull();
         result.Error.Should().Be(ErrorType.DatabaseError);
         result.Message.Should().NotBeNull();
-        result.Message.Should().Be("An error occurred while updating the book.");
+        result.Message.Should().Be("An error occurred while updating the book");
 
         _bookRepositoryMock.Verify(repo => repo.FindByIdAsync(book.Id), Times.Once);
         _bookRepositoryMock.Verify(repo => repo.Update(book), Times.Once);
@@ -419,7 +456,7 @@ public class BookServiceTests
         result.Model.Should().BeNull();
         result.Error.Should().Be(ErrorType.Unknown);
         result.Message.Should().NotBeNull();
-        result.Message.Should().Be("An unexpected error occurred while processing your request.");
+        result.Message.Should().Be("An unexpected error occurred while processing your request");
 
         _bookRepositoryMock.Verify(repo => repo.FindByIdAsync(book.Id), Times.Once);
         _bookRepositoryMock.Verify(repo => repo.Update(book), Times.Once);
@@ -479,7 +516,7 @@ public class BookServiceTests
         result.Model.Should().BeNull();
         result.Error.Should().Be(ErrorType.NotFound);
         result.Message.Should().NotBeNull();
-        result.Message.Should().Be($"Book with id {book.Id} was not found.");
+        result.Message.Should().Be($"Book with id {book.Id} was not found");
 
         _bookRepositoryMock.Verify(repo => repo.FindByIdAsync(book.Id), Times.Once);
         _bookRepositoryMock.Verify(repo => repo.Delete(book), Times.Never);
@@ -504,7 +541,7 @@ public class BookServiceTests
         result.Model.Should().BeNull();
         result.Error.Should().Be(ErrorType.DatabaseError);
         result.Message.Should().NotBeNull();
-        result.Message.Should().Be("An error occurred while deleting the book.");
+        result.Message.Should().Be("An error occurred while deleting the book");
 
         _bookRepositoryMock.Verify(repo => repo.FindByIdAsync(book.Id), Times.Once);
         _bookRepositoryMock.Verify(repo => repo.Delete(book), Times.Once);
@@ -539,7 +576,7 @@ public class BookServiceTests
         result.Model.Should().BeNull();
         result.Error.Should().Be(ErrorType.Unknown);
         result.Message.Should().NotBeNull();
-        result.Message.Should().Be("An unexpected error occurred while processing your request.");
+        result.Message.Should().Be("An unexpected error occurred while processing your request");
 
         _bookRepositoryMock.Verify(repo => repo.FindByIdAsync(book.Id), Times.Once);
         _bookRepositoryMock.Verify(repo => repo.Delete(book), Times.Once);

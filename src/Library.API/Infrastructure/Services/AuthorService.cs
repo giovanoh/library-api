@@ -24,9 +24,9 @@ public class AuthorService : BaseService, IAuthorService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while listing authors");
+            _logger.LogError(ex, "Error occurred while listing authors.");
             return Response<IEnumerable<Author>>.Fail(
-                "An error occurred while retrieving the authors.", 
+                "An error occurred while retrieving the authors",
                 ErrorType.DatabaseError);
         }
     }
@@ -37,15 +37,15 @@ public class AuthorService : BaseService, IAuthorService
         {
             var author = await _authorRepository.FindByIdAsync(authorId);
             if (author == null)
-                return Response<Author>.NotFound($"Author with id {authorId} was not found.");
+                return Response<Author>.NotFound($"Author with id {authorId} was not found");
 
             return Response<Author>.Ok(author);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while finding author {AuthorId}", authorId);
+            _logger.LogError(ex, "Error occurred while finding author {AuthorId}.", authorId);
             return Response<Author>.Fail(
-                "An error occurred while retrieving the author.", 
+                "An error occurred while retrieving the author",
                 ErrorType.DatabaseError);
         }
     }
@@ -61,16 +61,16 @@ public class AuthorService : BaseService, IAuthorService
         }
         catch (DbUpdateException ex)
         {
-            _logger.LogError(ex, "Error occurred while saving author to database");
+            _logger.LogError(ex, "Error occurred while saving author to database.");
             return Response<Author>.Fail(
-                "An error occurred while saving the author.", 
+                "An error occurred while saving the author",
                 ErrorType.DatabaseError);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unexpected error occurred while adding author");
+            _logger.LogError(ex, "Unexpected error occurred while adding author.");
             return Response<Author>.Fail(
-                "An unexpected error occurred while processing your request.", 
+                "An unexpected error occurred while processing your request",
                 ErrorType.Unknown);
         }
     }
@@ -81,7 +81,7 @@ public class AuthorService : BaseService, IAuthorService
         {
             var existingAuthor = await _authorRepository.FindByIdAsync(authorId);
             if (existingAuthor == null)
-                return Response<Author>.NotFound($"Author with id {authorId} was not found.");
+                return Response<Author>.NotFound($"Author with id {authorId} was not found");
 
             UpdateAuthorProperties(existingAuthor, author);
             
@@ -92,16 +92,16 @@ public class AuthorService : BaseService, IAuthorService
         }
         catch (DbUpdateException ex)
         {
-            _logger.LogError(ex, "Error occurred while updating author {AuthorId}", authorId);
+            _logger.LogError(ex, "Error occurred while updating author {AuthorId}.", authorId);
             return Response<Author>.Fail(
-                "An error occurred while updating the author.", 
+                "An error occurred while updating the author",
                 ErrorType.DatabaseError);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unexpected error occurred while updating author {AuthorId}", authorId);
+            _logger.LogError(ex, "Unexpected error occurred while updating author {AuthorId}.", authorId);
             return Response<Author>.Fail(
-                "An unexpected error occurred while processing your request.", 
+                "An unexpected error occurred while processing your request",
                 ErrorType.Unknown);
         }
     }
@@ -112,7 +112,7 @@ public class AuthorService : BaseService, IAuthorService
         {
             var existingAuthor = await _authorRepository.FindByIdAsync(authorId);
             if (existingAuthor == null)
-                return Response<Author>.NotFound($"Author with id {authorId} was not found.");
+                return Response<Author>.NotFound($"Author with id {authorId} was not found");
 
             _authorRepository.Delete(existingAuthor);
             await SaveChangesAsync();
@@ -121,16 +121,16 @@ public class AuthorService : BaseService, IAuthorService
         }
         catch (DbUpdateException ex)
         {
-            _logger.LogError(ex, "Error occurred while deleting author {AuthorId}", authorId);
+            _logger.LogError(ex, "Error occurred while deleting author {AuthorId}.", authorId);
             return Response<Author>.Fail(
-                "An error occurred while deleting the author.", 
+                "An error occurred while deleting the author",
                 ErrorType.DatabaseError);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unexpected error occurred while deleting author {AuthorId}", authorId);
+            _logger.LogError(ex, "Unexpected error occurred while deleting author {AuthorId}.", authorId);
             return Response<Author>.Fail(
-                "An unexpected error occurred while processing your request.", 
+                "An unexpected error occurred while processing your request",
                 ErrorType.Unknown);
         }
     }
