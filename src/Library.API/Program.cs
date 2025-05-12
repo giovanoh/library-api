@@ -6,13 +6,37 @@ using Library.API.Infrastructure.Repositories;
 using Library.API.Infrastructure.Services;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
+using System.Reflection;
 using System.Text.Json.Serialization;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo 
+    { 
+        Title = "Library API",
+        Version = "v1",
+        Description = "Simple API to manage a library",
+        Contact = new OpenApiContact
+        {
+            Name = "Giovano Hendges",
+            Url = new Uri("https://github.com/giovanoh")
+        },
+        License = new OpenApiLicense
+        {
+            Name = "MIT License",
+            Url = new Uri("https://opensource.org/licenses/MIT")
+        }
+    });
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
+});
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -22,9 +46,11 @@ builder.Services.AddControllers()
     {
         options.InvalidModelStateResponseFactory = InvalidModelStateResponseFactory.Create;
     });
+
 builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
 
-builder.Services.AddDbContext<ApiDbContext>(options => options.UseInMemoryDatabase("library-api-in-memory-database"));
+builder.Services.AddDbContext<ApiDbContext>(options => 
+    options.UseInMemoryDatabase("library-api-in-memory-database"));
 
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
@@ -35,6 +61,7 @@ builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 WebApplication app = builder.Build();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -42,6 +69,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 app.UseHttpsRedirection();
 app.MapControllers();
 app.Run();
