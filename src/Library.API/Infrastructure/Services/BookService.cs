@@ -1,9 +1,9 @@
+using Microsoft.EntityFrameworkCore;
+
 using Library.API.Domain.Models;
 using Library.API.Domain.Repositories;
 using Library.API.Domain.Services;
 using Library.API.Domain.Services.Communication;
-
-using Microsoft.EntityFrameworkCore;
 
 namespace Library.API.Infrastructure.Services;
 
@@ -11,15 +11,18 @@ public class BookService : BaseService, IBookService
 {
     private readonly IBookRepository _bookRepository;
     private readonly IAuthorRepository _authorRepository;
-    public BookService(IBookRepository bookRepository, IAuthorRepository authorRepository, IUnitOfWork unitOfWork, ILogger<BookService> logger)
+    private readonly System.Diagnostics.ActivitySource _activitySource;
+    public BookService(IBookRepository bookRepository, IAuthorRepository authorRepository, IUnitOfWork unitOfWork, ILogger<BookService> logger, System.Diagnostics.ActivitySource activitySource)
         : base(unitOfWork, logger)
     {
         _bookRepository = bookRepository;
         _authorRepository = authorRepository;
+        _activitySource = activitySource;
     }
 
     public async Task<Response<IEnumerable<Book>>> ListAsync()
     {
+        using var activity = _activitySource.StartActivity("Service: BookService.ListAsync");
         try
         {
             var books = await _bookRepository.ListAsync();
@@ -36,6 +39,7 @@ public class BookService : BaseService, IBookService
 
     public async Task<Response<Book>> FindByIdAsync(int bookId)
     {
+        using var activity = _activitySource.StartActivity("Service: BookService.FindByIdAsync");
         try
         {
             var book = await _bookRepository.FindByIdAsync(bookId);
@@ -55,6 +59,7 @@ public class BookService : BaseService, IBookService
 
     public async Task<Response<Book>> AddAsync(Book book)
     {
+        using var activity = _activitySource.StartActivity("Service: BookService.AddAsync");
         try
         {
             var author = await _authorRepository.FindByIdAsync(book.AuthorId);
@@ -84,6 +89,7 @@ public class BookService : BaseService, IBookService
 
     public async Task<Response<Book>> UpdateAsync(int bookId, Book book)
     {
+        using var activity = _activitySource.StartActivity("Service: BookService.UpdateAsync");
         try
         {
             var existingBook = await _bookRepository.FindByIdAsync(bookId);
@@ -119,6 +125,7 @@ public class BookService : BaseService, IBookService
 
     public async Task<Response<Book>> DeleteAsync(int bookId)
     {
+        using var activity = _activitySource.StartActivity("Service: BookService.DeleteAsync");
         try
         {
             var book = await _bookRepository.FindByIdAsync(bookId);

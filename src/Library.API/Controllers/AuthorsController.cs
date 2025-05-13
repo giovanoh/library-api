@@ -1,11 +1,12 @@
+using System.Diagnostics;
+
 using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 
 using Library.API.Domain.Models;
 using Library.API.Domain.Services;
 using Library.API.DTOs;
 using Library.API.DTOs.Response;
-
-using Microsoft.AspNetCore.Mvc;
 
 namespace Library.API.Controllers;
 
@@ -16,16 +17,19 @@ public class AuthorsController : ApiController
 {
     private readonly IAuthorService _authorService;
     private readonly IMapper _mapper;
+    private readonly ActivitySource _activitySource;
 
     /// <summary>
     /// Initializes a new instance of the AuthorsController
     /// </summary>
     /// <param name="authorService">Service for handling author operations</param>
     /// <param name="mapper">Object mapping service</param>
-    public AuthorsController(IAuthorService authorService, IMapper mapper)
+    /// <param name="activitySource">Activity source for tracing</param>
+    public AuthorsController(IAuthorService authorService, IMapper mapper, ActivitySource activitySource)
     {
         _authorService = authorService;
         _mapper = mapper;
+        _activitySource = activitySource;
     }
 
     /// <summary>
@@ -41,6 +45,7 @@ public class AuthorsController : ApiController
     [ProducesResponseType(typeof(ApiProblemDetails), 500)]
     public async Task<IActionResult> GetAllAsync()
     {
+        using var activity = _activitySource.StartActivity("Controller: AuthorsController.GetAllAsync");
         var result = await _authorService.ListAsync();
         if (!result.Success)
             return HandleErrorResponse(result);
@@ -63,6 +68,7 @@ public class AuthorsController : ApiController
     [ProducesResponseType(typeof(ApiProblemDetails), 500)]
     public async Task<IActionResult> GetByIdAsync(int id)
     {
+        using var activity = _activitySource.StartActivity("Controller: AuthorsController.GetByIdAsync");
         var result = await _authorService.FindByIdAsync(id);
         if (!result.Success)
             return HandleErrorResponse(result);
@@ -85,9 +91,10 @@ public class AuthorsController : ApiController
     [ProducesResponseType(typeof(ApiProblemDetails), 500)]
     public async Task<IActionResult> CreateAsync([FromBody] SaveAuthorDto saveAuthorDto)
     {
+        using var activity = _activitySource.StartActivity("Controller: AuthorsController.CreateAsync");
         var author = _mapper.Map<Author>(saveAuthorDto);
         var result = await _authorService.AddAsync(author);
-        
+
         if (!result.Success)
             return HandleErrorResponse(result);
 
@@ -110,9 +117,10 @@ public class AuthorsController : ApiController
     [ProducesResponseType(typeof(ApiProblemDetails), 500)]
     public async Task<IActionResult> UpdateAsync(int id, [FromBody] SaveAuthorDto saveAuthorDto)
     {
+        using var activity = _activitySource.StartActivity("Controller: AuthorsController.UpdateAsync");
         var author = _mapper.Map<Author>(saveAuthorDto);
         var result = await _authorService.UpdateAsync(id, author);
-        
+
         if (!result.Success)
             return HandleErrorResponse(result);
 
@@ -134,8 +142,9 @@ public class AuthorsController : ApiController
     [ProducesResponseType(typeof(ApiProblemDetails), 500)]
     public async Task<IActionResult> DeleteAsync(int id)
     {
+        using var activity = _activitySource.StartActivity("Controller: AuthorsController.DeleteAsync");
         var result = await _authorService.DeleteAsync(id);
-        
+
         if (!result.Success)
             return HandleErrorResponse(result);
 

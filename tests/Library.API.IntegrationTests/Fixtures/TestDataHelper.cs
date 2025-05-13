@@ -1,13 +1,13 @@
+using Microsoft.Extensions.DependencyInjection;
+
 using Library.API.Domain.Models;
 using Library.API.Infrastructure.Contexts;
-
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Library.API.IntegrationTests.Fixtures;
 
 public static class TestDataHelper
 {
-    private static Author[] GetDefaultAuthors() => 
+    private static Author[] GetDefaultAuthors() =>
     [
         new Author
         {
@@ -53,7 +53,7 @@ public static class TestDataHelper
         dbContext.SaveChanges();
     }
 
-    private static Book[] GetDefaultBooks() => 
+    private static Book[] GetDefaultBooks() =>
     [
         new Book
         {

@@ -1,0 +1,41 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: docker-logs
+    static_configs:
+      - targets: [localhost]
+        labels:
+          job: library-api
+          __path__: /var/lib/docker/containers/*/*.log
+    # pipeline_stages:
+    #   - docker: {}
+    #   - json:
+    #       expressions:
+    #         Properties: Properties
+    #   - json:
+    #       source: Properties
+    #       expressions:
+    #         Path: Path
+    #         RequestPath: RequestPath
+    #   - match:
+    #       selector: '{job="library-api"}'
+    #       stages:
+    #         - drop:
+    #             expression: '.Path == "/metrics" or .Path == "/swagger" or .RequestPath == "/metrics" or .RequestPath == "/swagger"'
+    #   - match:
+    #       selector: '{job="library-api"}'
+    #       stages:
+    #         - drop:
+    #             expression: '"/metrics" in .log' 
+    #   - drop:
+    #       expression: '"/metrics" in .log'
+    #   - drop:
+    #       expression: '"/swagger" in .log'

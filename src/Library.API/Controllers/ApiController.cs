@@ -1,7 +1,8 @@
+using Microsoft.AspNetCore.Mvc;
+
 using Library.API.Domain.Services.Communication;
 using Library.API.DTOs.Response;
 using Library.API.Infrastructure.Factories;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Library.API.Controllers;
 

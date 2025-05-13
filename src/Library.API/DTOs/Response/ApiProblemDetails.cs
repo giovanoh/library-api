@@ -21,4 +21,7 @@ public record ApiProblemDetails
 
     [JsonPropertyName("errors")]
     public Dictionary<string, string[]>? Errors { get; init; }
+
+    [JsonPropertyName("correlationId")]
+    public string? CorrelationId { get; init; }
 }
