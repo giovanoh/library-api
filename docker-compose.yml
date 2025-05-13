@@ -1,0 +1,68 @@
+services:
+
+  library-api:
+    build:
+      context: ./src/Library.API
+    container_name: library-api
+    ports:
+      - "5001:5001" # HTTPS
+      - "5000:5000" # HTTP
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:5001;http://+:5000
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=library-secure-password
+    volumes:
+      - ./aspnetapp.pfx:/https/aspnetapp.pfx:ro
+    depends_on:
+      - jaeger
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.69.0
+    container_name: jaeger
+    ports:
+      - "16686:16686" # UI Web
+      - "4317:4317" # OTLP gRPC (OpenTelemetry Protocol)
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    depends_on:
+      - library-api
+
+  loki:
+    image: grafana/loki:3.5.0
+    container_name: loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+
+  promtail:
+    image: grafana/promtail:3.5.0
+    container_name: promtail
+    ports:
+      - "9080:9080"
+    volumes:
+      - ./observability/loki/promtail-config-wsl.yml:/etc/promtail/config.yml # WSL
+      #- ./observability/loki/promtail-config.yml:/etc/promtail/config.yml # Linux nativo
+      #- /var/lib/docker/containers:/var/lib/docker/containers:ro # Linux nativo
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: -config.file=/etc/promtail/config.yml -log.level=debug
+    depends_on:
+      - loki
+
+  grafana:
+    image: grafana/grafana:10.4.2
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+      - loki
+    volumes:
+      - ./observability/grafana/datasources:/etc/grafana/provisioning/datasources
+      - ./observability/grafana/dashboards:/etc/grafana/provisioning/dashboards

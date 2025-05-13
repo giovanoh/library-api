@@ -1,10 +1,11 @@
+using System.Diagnostics;
+
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 
 using Library.API.Domain.Models;
 using Library.API.Infrastructure.Repositories;
 using Library.API.IntegrationTests.Fixtures;
-
-using Microsoft.EntityFrameworkCore;
 
 namespace Library.API.IntegrationTests.Repositories;
 
@@ -15,7 +16,7 @@ public class AuthorRepositoryTests : RepositoryTestBase
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var authorRepository = new AuthorRepository(context);
+        var authorRepository = new AuthorRepository(context, new ActivitySource("Library.API.IntegrationTests"));
         var unitOfWork = new UnitOfWork(context);
         var author = new Author
         {
@@ -43,7 +44,7 @@ public class AuthorRepositoryTests : RepositoryTestBase
         // Arrange
         using var context = CreateInMemoryContext();
         TestDataHelper.SeedAuthors(context);
-        var authorRepository = new AuthorRepository(context);
+        var authorRepository = new AuthorRepository(context, new ActivitySource("Library.API.IntegrationTests"));
         var unitOfWork = new UnitOfWork(context);
 
         // Act
@@ -62,7 +63,7 @@ public class AuthorRepositoryTests : RepositoryTestBase
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var authorRepository = new AuthorRepository(context);
+        var authorRepository = new AuthorRepository(context, new ActivitySource("Library.API.IntegrationTests"));
 
         // Act
         var found = await authorRepository.FindByIdAsync(999);
@@ -77,7 +78,7 @@ public class AuthorRepositoryTests : RepositoryTestBase
         // Arrange
         using var context = CreateInMemoryContext();
         TestDataHelper.SeedAuthors(context);
-        var authorRepository = new AuthorRepository(context);
+        var authorRepository = new AuthorRepository(context, new ActivitySource("Library.API.IntegrationTests"));
         var unitOfWork = new UnitOfWork(context);
 
         // Act
@@ -102,7 +103,7 @@ public class AuthorRepositoryTests : RepositoryTestBase
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var authorRepository = new AuthorRepository(context);
+        var authorRepository = new AuthorRepository(context, new ActivitySource("Library.API.IntegrationTests"));
         var unitOfWork = new UnitOfWork(context);
         var author = new Author
         {
@@ -129,7 +130,7 @@ public class AuthorRepositoryTests : RepositoryTestBase
         // Arrange
         using var context = CreateInMemoryContext();
         TestDataHelper.SeedAuthors(context);
-        var authorRepository = new AuthorRepository(context);
+        var authorRepository = new AuthorRepository(context, new ActivitySource("Library.API.IntegrationTests"));
         var unitOfWork = new UnitOfWork(context);
         // Act
         var author = await authorRepository.FindByIdAsync(1);
@@ -146,7 +147,7 @@ public class AuthorRepositoryTests : RepositoryTestBase
     {
         // Arrange
         using var context = CreateInMemoryContext();
-        var authorRepository = new AuthorRepository(context);
+        var authorRepository = new AuthorRepository(context, new ActivitySource("Library.API.IntegrationTests"));
         var unitOfWork = new UnitOfWork(context);
         var author = new Author
         {

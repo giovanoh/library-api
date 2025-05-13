@@ -1,6 +1,69 @@
-@Library_API_HostAddress = http://localhost:5062
+@Library_API_HostAddress = http://localhost:5000
 
+### 1 - Criar um author
+# @name CreateAuthor
+POST {{Library_API_HostAddress}}/api/authors
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "J. R. R. Tolkien",
+  "birthDate": "1892-01-03",
+  "biography": "Autor de O Senhor dos Anéis."
+}
+
+### 2 - Listar autores
 GET {{Library_API_HostAddress}}/api/authors
+Accept: application/json
+
+### 3 - Atualizar autor
+@AuthorId = {{CreateAuthor.response.body.data.id}}
+PUT {{Library_API_HostAddress}}/api/authors/{{AuthorId}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "J. R. R. Tolkien (Atualizado)",
+  "birthDate": "1892-01-03",
+  "biography": "Autor britânico, famoso por O Senhor dos Anéis."
+}
+
+### 4 - Criar um book atrelado ao author
+# @name CreateBook
+POST {{Library_API_HostAddress}}/api/books
+Content-Type: application/json
+Accept: application/json
+
+{
+  "title": "O Senhor dos Anéis",
+  "description": "Uma das maiores obras de fantasia.",
+  "releaseDate": "1954-07-29",
+  "authorId": {{AuthorId}}
+}
+
+### 5 - Listar books
+GET {{Library_API_HostAddress}}/api/books
+Accept: application/json
+
+### 6 - Atualizar o book
+@BookId = {{CreateBook.response.body.data.id}}
+PUT {{Library_API_HostAddress}}/api/books/{{BookId}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "title": "O Senhor dos Anéis (Atualizado)",
+  "description": "Trilogia clássica de fantasia épica.",
+  "releaseDate": "1954-07-29",
+  "authorId": {{AuthorId}}
+}
+
+### 7 - Remover o book
+DELETE {{Library_API_HostAddress}}/api/books/{{BookId}}
+Accept: application/json
+
+### 8 - Remover o autor
+DELETE {{Library_API_HostAddress}}/api/authors/{{AuthorId}}
 Accept: application/json
 
 ###

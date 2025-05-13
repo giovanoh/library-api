@@ -1,6 +1,6 @@
-using Library.API.Infrastructure.Contexts;
-
 using Microsoft.EntityFrameworkCore;
+
+using Library.API.Infrastructure.Contexts;
 
 namespace Library.API.IntegrationTests.Repositories;
 
@@ -16,7 +16,7 @@ public abstract class RepositoryTestBase : IDisposable
         var context = new ApiDbContext(options);
         _contexts.Add(context);
         return context;
-    }    
+    }
 
     public void Dispose()
     {

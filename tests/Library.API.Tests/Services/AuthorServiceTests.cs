@@ -1,8 +1,9 @@
-using FluentAssertions;
-using Moq;
+using System.Diagnostics;
 
+using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Moq;
 
 using Library.API.Domain.Models;
 using Library.API.Domain.Repositories;
@@ -17,16 +18,17 @@ public class AuthorServiceTests
     private readonly Mock<IAuthorRepository> _authorRepositoryMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<ILogger<AuthorService>> _loggerMock;
-
+    private readonly ActivitySource _activitySource;
     public AuthorServiceTests()
     {
         _authorRepositoryMock = new Mock<IAuthorRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _loggerMock = new Mock<ILogger<AuthorService>>();
+        _activitySource = new ActivitySource("Library.API.Tests");
     }
 
     private AuthorService CreateService() =>
-        new AuthorService(_authorRepositoryMock.Object, _unitOfWorkMock.Object, _loggerMock.Object);
+        new AuthorService(_authorRepositoryMock.Object, _unitOfWorkMock.Object, _loggerMock.Object, _activitySource);
 
     [Fact]
     public async Task ListAsync_ShouldReturnAuthors_WhenSuccessful()

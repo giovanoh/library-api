@@ -1,10 +1,11 @@
+using System.Diagnostics;
+
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 
 using Library.API.Domain.Models;
 using Library.API.Infrastructure.Repositories;
 using Library.API.IntegrationTests.Fixtures;
-
-using Microsoft.EntityFrameworkCore;
 
 namespace Library.API.IntegrationTests.Repositories;
 
@@ -16,8 +17,8 @@ public class BookRepositoryTests : RepositoryTestBase
         // Arrange
         using var context = CreateInMemoryContext();
         var unitOfWork = new UnitOfWork(context);
-        var bookRepository = new BookRepository(context);
-        var authorRepository = new AuthorRepository(context);
+        var bookRepository = new BookRepository(context, new ActivitySource("TestSource"));
+        var authorRepository = new AuthorRepository(context, new ActivitySource("TestSource"));
         var author = new Author
         {
             Name = "Author 1",
@@ -61,7 +62,7 @@ public class BookRepositoryTests : RepositoryTestBase
         using var context = CreateInMemoryContext();
         TestDataHelper.SeedAuthors(context);
         TestDataHelper.SeedBooks(context);
-        var bookRepository = new BookRepository(context);        
+        var bookRepository = new BookRepository(context, new ActivitySource("Library.API.IntegrationTests"));
 
         // Act
         var result = await bookRepository.FindByIdAsync(1);
@@ -81,10 +82,10 @@ public class BookRepositoryTests : RepositoryTestBase
         // Arrange
         using var context = CreateInMemoryContext();
         var unitOfWork = new UnitOfWork(context);
-        var bookRepository = new BookRepository(context);
+        var bookRepository = new BookRepository(context, new ActivitySource("Library.API.IntegrationTests"));
 
         // Act
-        var result = await bookRepository.FindByIdAsync(999); 
+        var result = await bookRepository.FindByIdAsync(999);
 
         // Assert
         result.Should().BeNull();
@@ -98,7 +99,7 @@ public class BookRepositoryTests : RepositoryTestBase
         TestDataHelper.SeedAuthors(context);
         TestDataHelper.SeedBooks(context);
         var unitOfWork = new UnitOfWork(context);
-        var bookRepository = new BookRepository(context);
+        var bookRepository = new BookRepository(context, new ActivitySource("Library.API.IntegrationTests"));
 
         // Act
         var book = await bookRepository.FindByIdAsync(1);
@@ -123,7 +124,7 @@ public class BookRepositoryTests : RepositoryTestBase
         // Arrange
         using var context = CreateInMemoryContext();
         var unitOfWork = new UnitOfWork(context);
-        var bookRepository = new BookRepository(context);
+        var bookRepository = new BookRepository(context, new ActivitySource("Library.API.IntegrationTests"));
         var book = new Book
         {
             Id = 999,
@@ -152,7 +153,7 @@ public class BookRepositoryTests : RepositoryTestBase
         TestDataHelper.SeedAuthors(context);
         TestDataHelper.SeedBooks(context);
         var unitOfWork = new UnitOfWork(context);
-        var bookRepository = new BookRepository(context);
+        var bookRepository = new BookRepository(context, new ActivitySource("Library.API.IntegrationTests"));
 
         // Act
         var book = await bookRepository.FindByIdAsync(1);
@@ -170,7 +171,7 @@ public class BookRepositoryTests : RepositoryTestBase
         // Arrange
         using var context = CreateInMemoryContext();
         var unitOfWork = new UnitOfWork(context);
-        var bookRepository = new BookRepository(context);
+        var bookRepository = new BookRepository(context, new ActivitySource("Library.API.IntegrationTests"));
         var book = new Book
         {
             Id = 999,

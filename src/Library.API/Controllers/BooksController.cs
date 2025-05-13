@@ -1,11 +1,12 @@
+using System.Diagnostics;
+
 using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 
 using Library.API.Domain.Models;
 using Library.API.Domain.Services;
 using Library.API.DTOs;
 using Library.API.DTOs.Response;
-
-using Microsoft.AspNetCore.Mvc;
 
 namespace Library.API.Controllers;
 
@@ -16,16 +17,19 @@ public class BooksController : ApiController
 {
     private readonly IBookService _bookService;
     private readonly IMapper _mapper;
+    private readonly ActivitySource _activitySource;
 
     /// <summary>
     /// Initializes a new instance of the BooksController
     /// </summary>
     /// <param name="bookService">Service for handling book operations</param>
     /// <param name="mapper">Object mapping service</param>
-    public BooksController(IBookService bookService, IMapper mapper)
+    /// <param name="activitySource">Activity source for tracing</param>
+    public BooksController(IBookService bookService, IMapper mapper, ActivitySource activitySource)
     {
         _bookService = bookService;
         _mapper = mapper;
+        _activitySource = activitySource;
     }
 
     /// <summary>
@@ -41,6 +45,7 @@ public class BooksController : ApiController
     [ProducesResponseType(typeof(ApiProblemDetails), 500)]
     public async Task<IActionResult> GetAllAsync()
     {
+        using var activity = _activitySource.StartActivity("Controller: BooksController.GetAllAsync");
         var result = await _bookService.ListAsync();
         if (!result.Success)
             return HandleErrorResponse(result);
@@ -63,6 +68,7 @@ public class BooksController : ApiController
     [ProducesResponseType(typeof(ApiProblemDetails), 500)]
     public async Task<IActionResult> GetByIdAsync(int id)
     {
+        using var activity = _activitySource.StartActivity("Controller: BooksController.GetByIdAsync");
         var result = await _bookService.FindByIdAsync(id);
         if (!result.Success)
             return HandleErrorResponse(result);
@@ -87,6 +93,7 @@ public class BooksController : ApiController
     [ProducesResponseType(typeof(ApiProblemDetails), 500)]
     public async Task<IActionResult> CreateAsync([FromBody] SaveBookDto saveBookDto)
     {
+        using var activity = _activitySource.StartActivity("Controller: BooksController.CreateAsync");
         var book = _mapper.Map<Book>(saveBookDto);
         var result = await _bookService.AddAsync(book);
         if (!result.Success)
@@ -111,6 +118,7 @@ public class BooksController : ApiController
     [ProducesResponseType(typeof(ApiProblemDetails), 500)]
     public async Task<IActionResult> UpdateAsync(int id, [FromBody] SaveBookDto saveBookDto)
     {
+        using var activity = _activitySource.StartActivity("Controller: BooksController.UpdateAsync");
         var book = _mapper.Map<Book>(saveBookDto);
         var result = await _bookService.UpdateAsync(id, book);
         if (!result.Success)
@@ -134,6 +142,7 @@ public class BooksController : ApiController
     [ProducesResponseType(typeof(ApiProblemDetails), 500)]
     public async Task<IActionResult> DeleteAsync(int id)
     {
+        using var activity = _activitySource.StartActivity("Controller: BooksController.DeleteAsync");
         var result = await _bookService.DeleteAsync(id);
         if (!result.Success)
             return HandleErrorResponse(result);

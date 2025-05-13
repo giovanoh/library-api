@@ -1,7 +1,7 @@
-using Library.API.Domain.Models;
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+using Library.API.Domain.Models;
 
 namespace Library.API.Infrastructure.Contexts.Configurations;
 
@@ -22,6 +22,6 @@ public class AuthorConfiguration : IEntityTypeConfiguration<Author>
             .HasMaxLength(1000);
         builder.HasMany(a => a.Books)
             .WithOne(b => b.Author)
-            .HasForeignKey(b => b.AuthorId);            
+            .HasForeignKey(b => b.AuthorId);
     }
 }

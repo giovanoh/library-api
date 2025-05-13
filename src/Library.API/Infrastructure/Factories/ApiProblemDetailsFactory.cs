@@ -1,9 +1,14 @@
+using System.Diagnostics;
+
 using Library.API.DTOs.Response;
 
 namespace Library.API.Infrastructure.Factories;
 
 public static class ApiProblemDetailsFactory
 {
+    private static string GetCorrelationId()
+        => Activity.Current?.TraceId.ToString() ?? Guid.NewGuid().ToString();
+
     public static ApiProblemDetails Create(int status, string title, string detail, string? instance = null)
     {
         return new ApiProblemDetails
@@ -11,7 +16,8 @@ public static class ApiProblemDetailsFactory
             Status = status,
             Title = title,
             Detail = detail,
-            Instance = instance
+            Instance = instance,
+            CorrelationId = GetCorrelationId()
         };
     }
 
@@ -24,7 +30,8 @@ public static class ApiProblemDetailsFactory
             Status = StatusCodes.Status400BadRequest,
             Detail = "One or more validation errors occurred.",
             Instance = instance,
-            Errors = new Dictionary<string, string[]>(errors)
+            Errors = new Dictionary<string, string[]>(errors),
+            CorrelationId = GetCorrelationId()
         };
     }
 
@@ -36,7 +43,8 @@ public static class ApiProblemDetailsFactory
             Title = "Resource Not Found",
             Status = StatusCodes.Status404NotFound,
             Detail = detail,
-            Instance = instance
+            Instance = instance,
+            CorrelationId = GetCorrelationId()
         };
     }
 
@@ -48,7 +56,8 @@ public static class ApiProblemDetailsFactory
             Title = "Internal Server Error",
             Status = StatusCodes.Status500InternalServerError,
             Detail = detail,
-            Instance = instance
+            Instance = instance,
+            CorrelationId = GetCorrelationId()
         };
     }
-} 
+}

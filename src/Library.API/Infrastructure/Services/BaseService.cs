@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+
 using Library.API.Domain.Repositories;
 
 namespace Library.API.Infrastructure.Services;
@@ -26,4 +27,4 @@ public abstract class BaseService
             throw new DbUpdateException("Failed to save changes to the database.", ex);
         }
     }
-} 
+}

@@ -1,23 +1,27 @@
+using Microsoft.EntityFrameworkCore;
+
 using Library.API.Domain.Models;
 using Library.API.Domain.Repositories;
 using Library.API.Domain.Services;
 using Library.API.Domain.Services.Communication;
-using Microsoft.EntityFrameworkCore;
 
 namespace Library.API.Infrastructure.Services;
 
 public class AuthorService : BaseService, IAuthorService
 {
     private readonly IAuthorRepository _authorRepository;
+    private readonly System.Diagnostics.ActivitySource _activitySource;
 
-    public AuthorService(IAuthorRepository authorRepository, IUnitOfWork unitOfWork, ILogger<AuthorService> logger)
+    public AuthorService(IAuthorRepository authorRepository, IUnitOfWork unitOfWork, ILogger<AuthorService> logger, System.Diagnostics.ActivitySource activitySource)
         : base(unitOfWork, logger)
     {
         _authorRepository = authorRepository;
+        _activitySource = activitySource;
     }
 
     public async Task<Response<IEnumerable<Author>>> ListAsync()
     {
+        using var activity = _activitySource.StartActivity("Service: AuthorService.ListAsync");
         try
         {
             return Response<IEnumerable<Author>>.Ok(await _authorRepository.ListAsync());
@@ -33,6 +37,7 @@ public class AuthorService : BaseService, IAuthorService
 
     public async Task<Response<Author>> FindByIdAsync(int authorId)
     {
+        using var activity = _activitySource.StartActivity("Service: AuthorService.FindByIdAsync");
         try
         {
             var author = await _authorRepository.FindByIdAsync(authorId);
@@ -52,11 +57,12 @@ public class AuthorService : BaseService, IAuthorService
 
     public async Task<Response<Author>> AddAsync(Author author)
     {
+        using var activity = _activitySource.StartActivity("Service: AuthorService.AddAsync");
         try
         {
             await _authorRepository.AddAsync(author);
             await SaveChangesAsync();
-            
+
             return Response<Author>.Ok(author);
         }
         catch (DbUpdateException ex)
@@ -77,6 +83,7 @@ public class AuthorService : BaseService, IAuthorService
 
     public async Task<Response<Author>> UpdateAsync(int authorId, Author author)
     {
+        using var activity = _activitySource.StartActivity("Service: AuthorService.UpdateAsync");
         try
         {
             var existingAuthor = await _authorRepository.FindByIdAsync(authorId);
@@ -84,10 +91,10 @@ public class AuthorService : BaseService, IAuthorService
                 return Response<Author>.NotFound($"Author with id {authorId} was not found");
 
             UpdateAuthorProperties(existingAuthor, author);
-            
+
             _authorRepository.Update(existingAuthor);
             await SaveChangesAsync();
-            
+
             return Response<Author>.Ok(existingAuthor);
         }
         catch (DbUpdateException ex)
@@ -108,6 +115,7 @@ public class AuthorService : BaseService, IAuthorService
 
     public async Task<Response<Author>> DeleteAsync(int authorId)
     {
+        using var activity = _activitySource.StartActivity("Service: AuthorService.DeleteAsync");
         try
         {
             var existingAuthor = await _authorRepository.FindByIdAsync(authorId);
@@ -116,7 +124,7 @@ public class AuthorService : BaseService, IAuthorService
 
             _authorRepository.Delete(existingAuthor);
             await SaveChangesAsync();
-            
+
             return Response<Author>.Ok(existingAuthor);
         }
         catch (DbUpdateException ex)

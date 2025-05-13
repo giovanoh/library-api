@@ -1,8 +1,8 @@
 using System.Reflection;
 
-using Library.API.Domain.Models;
-
 using Microsoft.EntityFrameworkCore;
+
+using Library.API.Domain.Models;
 
 namespace Library.API.Infrastructure.Contexts;
 

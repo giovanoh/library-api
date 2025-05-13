@@ -1,7 +1,7 @@
-using Library.API.Domain.Models;
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+using Library.API.Domain.Models;
 
 namespace Library.API.Infrastructure.Contexts.Configurations;
 
