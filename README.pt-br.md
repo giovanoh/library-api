@@ -1,3 +1,24 @@
+## Sumário
+
+- [library-api](#library-api)
+  - [Sobre](#sobre)
+  - [Funcionalidades & Boas Práticas](#funcionalidades--boas-práticas)
+  - [Primeiros Passos](#primeiros-passos)
+    - [Pré-requisitos](#pré-requisitos)
+    - [Instalando dependências](#instalando-dependências)
+    - [Executando a API](#executando-a-api)
+    - [Documentação da API](#documentação-da-api)
+  - [Testes Automatizados](#testes-automatizados)
+  - [Testando a API Manualmente](#testando-a-api-manualmente)
+  - [Gerando relatório de cobertura de código](#gerando-relatório-de-cobertura-de-código)
+  - [Estrutura do Projeto](#estrutura-do-projeto)
+  - [Observabilidade com Jaeger, Prometheus, Loki e Grafana](#observabilidade-com-jaeger-prometheus-loki-e-grafana)
+    - [Subir todos os serviços de observabilidade](#subir-todos-os-serviços-de-observabilidade)
+    - [Parar os serviços](#parar-os-serviços)
+    - [Observabilidade - Principais pacotes utilizados](#observabilidade---principais-pacotes-utilizados)
+    - [Resumo dos containers](#resumo-dos-containers)
+  - [Licença](#licença)
+
 # library-api
 
 > :globe_with_meridians: Leia em outros idiomas: [English](README.md)
