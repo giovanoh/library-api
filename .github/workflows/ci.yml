@@ -40,25 +40,21 @@ jobs:
     - name: Unit Tests
       run: |
         dotnet test ${{ env.TEST_PROJECT_PATH }} \
-        --settings .coverlet.runsettings \
-        /p:CollectCoverage=true \
-        /p:CoverletOutputFormat=opencover \
-        /p:CoverletOutput=./coverage/unit/
+          --collect:"XPlat Code Coverage" \
+          --settings .coverlet.runsettings
     
     - name: Integration Tests
       run: |
         dotnet test ${{ env.INTEGRATION_TEST_PROJECT_PATH }} \
-        --settings .coverlet.runsettings \
-        /p:CollectCoverage=true \
-        /p:CoverletOutputFormat=opencover \
-        /p:CoverletOutput=./coverage/integration/
+          --collect:"XPlat Code Coverage" \
+          --settings .coverlet.runsettings
     
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v5
       with:
         files: |
-          ./tests/Library.API.Tests/coverage/unit/coverage.opencover.xml
-          ./tests/Library.API.IntegrationTests/coverage/integration/coverage.opencover.xml
+          ./tests/Library.API.Tests/TestResults/**/coverage.opencover.xml
+          ./tests/Library.API.IntegrationTests/TestResults/**/coverage.opencover.xml
         fail_ci_if_error: true
         token: ${{ secrets.CODECOV_TOKEN }}
 
