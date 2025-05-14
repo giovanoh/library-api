@@ -15,5 +15,5 @@ public record SaveBookDto
     public DateTime? ReleaseDate { get; init; }
 
     [Required]
-    public int AuthorId { get; init; }
+    public int? AuthorId { get; init; }
 }
