@@ -1,23 +1,7 @@
-## Table of Contents
+[![Continuous Integration](https://github.com/giovanoh/library-api/actions/workflows/ci.yml/badge.svg)](https://github.com/giovanoh/library-api/actions/workflows/ci.yml)
+[![Continuous Deployment](https://github.com/giovanoh/library-api/actions/workflows/cd.yml/badge.svg)](https://github.com/giovanoh/library-api/actions/workflows/cd.yml)
 
-- [library-api](#library-api)
-  - [About](#about)
-  - [Features & Best Practices](#features--best-practices)
-  - [Getting Started](#getting-started)
-    - [Prerequisites](#prerequisites)
-    - [Installing dependencies](#installing-dependencies)
-    - [Running the API](#running-the-api)
-    - [API Documentation](#api-documentation)
-  - [Automated Tests](#automated-tests)
-  - [Manual API Testing](#manual-api-testing)
-  - [Running Code Coverage](#running-code-coverage)
-  - [Project Structure](#project-structure)
-  - [Observability with Jaeger, Prometheus, Loki and Grafana](#observability-with-jaeger-prometheus-loki-and-grafana)
-    - [Start all observability services](#start-all-observability-services)
-    - [Stop the services](#stop-the-services)
-    - [Observability - Main packages used](#observability---main-packages-used)
-    - [Containers summary](#containers-summary)
-  - [License](#license)
+---
 
 # library-api
 
@@ -29,6 +13,25 @@ Prototype of a .NET 8 Web API for a Library system
 
 This project demonstrates how to build a RESTful API using **.NET 8**, following modern best practices for architecture, testing, and maintainability.  
 It simulates a simple library system with authors and books, and is designed for learning and demonstration purposes.
+
+## Table of Contents
+
+- [Features & Best Practices](#features--best-practices)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installing dependencies](#installing-dependencies)
+  - [Running the API](#running-the-api)
+  - [API Documentation](#api-documentation)
+- [Automated Tests](#automated-tests)
+- [Manual API Testing](#manual-api-testing)
+- [Running Code Coverage](#running-code-coverage)
+- [Project Structure](#project-structure)
+- [Observability with Jaeger, Prometheus, Loki and Grafana](#observability-with-jaeger-prometheus-loki-and-grafana)
+  - [Start all observability services](#start-all-observability-services)
+  - [Stop the services](#stop-the-services)
+  - [Observability - Main packages used](#observability---main-packages-used)
+  - [Containers summary](#containers-summary)
+- [License](#license)
 
 ## Features & Best Practices
 

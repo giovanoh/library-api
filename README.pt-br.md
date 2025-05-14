@@ -1,23 +1,7 @@
-## Sumário
+[![Integração Contínua](https://github.com/giovanoh/library-api/actions/workflows/ci.yml/badge.svg)](https://github.com/giovanoh/library-api/actions/workflows/ci.yml)
+[![Deploy Continuo](https://github.com/giovanoh/library-api/actions/workflows/cd.yml/badge.svg)](https://github.com/giovanoh/library-api/actions/workflows/cd.yml)
 
-- [library-api](#library-api)
-  - [Sobre](#sobre)
-  - [Funcionalidades & Boas Práticas](#funcionalidades--boas-práticas)
-  - [Primeiros Passos](#primeiros-passos)
-    - [Pré-requisitos](#pré-requisitos)
-    - [Instalando dependências](#instalando-dependências)
-    - [Executando a API](#executando-a-api)
-    - [Documentação da API](#documentação-da-api)
-  - [Testes Automatizados](#testes-automatizados)
-  - [Testando a API Manualmente](#testando-a-api-manualmente)
-  - [Gerando relatório de cobertura de código](#gerando-relatório-de-cobertura-de-código)
-  - [Estrutura do Projeto](#estrutura-do-projeto)
-  - [Observabilidade com Jaeger, Prometheus, Loki e Grafana](#observabilidade-com-jaeger-prometheus-loki-e-grafana)
-    - [Subir todos os serviços de observabilidade](#subir-todos-os-serviços-de-observabilidade)
-    - [Parar os serviços](#parar-os-serviços)
-    - [Observabilidade - Principais pacotes utilizados](#observabilidade---principais-pacotes-utilizados)
-    - [Resumo dos containers](#resumo-dos-containers)
-  - [Licença](#licença)
+---
 
 # library-api
 
@@ -29,6 +13,25 @@ Protótipo de uma Web API .NET 8 para um sistema de biblioteca
 
 Este projeto demonstra como construir uma API RESTful usando **.NET 8**, seguindo boas práticas modernas de arquitetura, testes e manutenibilidade.  
 Simula um sistema simples de biblioteca com autores e livros, e foi projetado para fins de aprendizado e demonstração.
+
+## Sumário
+
+- [Funcionalidades & Boas Práticas](#funcionalidades--boas-práticas)
+- [Primeiros Passos](#primeiros-passos)
+  - [Pré-requisitos](#pré-requisitos)
+  - [Instalando dependências](#instalando-dependências)
+  - [Executando a API](#executando-a-api)
+  - [Documentação da API](#documentação-da-api)
+- [Testes Automatizados](#testes-automatizados)
+- [Testando a API Manualmente](#testando-a-api-manualmente)
+- [Gerando relatório de cobertura de código](#gerando-relatório-de-cobertura-de-código)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Observabilidade com Jaeger, Prometheus, Loki e Grafana](#observabilidade-com-jaeger-prometheus-loki-e-grafana)
+  - [Subir todos os serviços de observabilidade](#subir-todos-os-serviços-de-observabilidade)
+  - [Parar os serviços](#parar-os-serviços)
+  - [Observabilidade - Principais pacotes utilizados](#observabilidade---principais-pacotes-utilizados)
+  - [Resumo dos containers](#resumo-dos-containers)
+- [Licença](#licença)
 
 ## Funcionalidades & Boas Práticas
 
