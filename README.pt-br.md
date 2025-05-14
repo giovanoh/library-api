@@ -26,6 +26,7 @@ Simula um sistema simples de biblioteca com autores e livros, e foi projetado pa
 - [Testando a API Manualmente](#testando-a-api-manualmente)
 - [Gerando relatório de cobertura de código](#gerando-relatório-de-cobertura-de-código)
 - [Estrutura do Projeto](#estrutura-do-projeto)
+- [Integração Contínua e Deploy (CI/CD)](#integração-contínua-e-deploy-cicd)
 - [Observabilidade com Jaeger, Prometheus, Loki e Grafana](#observabilidade-com-jaeger-prometheus-loki-e-grafana)
   - [Subir todos os serviços de observabilidade](#subir-todos-os-serviços-de-observabilidade)
   - [Parar os serviços](#parar-os-serviços)
@@ -164,6 +165,48 @@ tests/Library.API.Tests/   # Testes unitários
 tests/Library.API.IntegrationTests/ # Testes de integração
 observability/             # Configurações de observabilidade (dashboards Grafana, Prometheus, Loki, provisionamento)
 ```
+
+### Integração Contínua e Deploy (CI/CD)
+
+#### Visão Geral do Workflow
+
+O projeto implementa um pipeline de Integração Contínua e Deploy (CI/CD) abrangente e automatizado usando GitHub Actions:
+
+##### Integração Contínua (CI)
+- **Gatilhos**: 
+  - Pushes para branch `main`
+  - Pushes para branches `docs/*`, `feature/*`, `refactor/*` e `test/*`
+  - Pull requests para branch `main`
+
+- **Processo de Build e Teste**:
+  - Configura .NET 8 SDK
+  - Restaura dependências do projeto
+  - Compila o projeto em configuração de Release
+  - Executa suítes abrangentes de testes:
+    - Testes Unitários
+    - Testes de Integração
+  - Gera relatórios de cobertura de código
+  - Envia relatórios de cobertura para Codecov para acompanhamento
+
+##### Deploy Contínuo (CD)
+- **Gatilho**: Conclusão bem-sucedida do workflow de Integração Contínua na branch `main`
+
+- **Publicação de Imagem Docker**:
+  - Constrói imagem Docker para a Library API
+  - Publica imagem no Docker Hub
+  - Gera múltiplas tags:
+    - Tags específicas de branch
+    - Tags de versionamento semântico
+    - Tag `latest`
+
+#### Benefícios Principais
+- Testes automatizados para cada mudança de código
+- Processo de build e deploy consistente
+- Feedback imediato sobre qualidade do código
+- Geração automática de imagem Docker
+- Rastreamento de cobertura de código
+
+**Nota**: O deploy requer credenciais configuradas do Docker Hub nos Secrets do GitHub.
 
 ### Observabilidade com Jaeger, Prometheus, Loki e Grafana
 
