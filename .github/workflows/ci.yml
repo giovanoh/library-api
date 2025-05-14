@@ -1,0 +1,64 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - main
+      - 'docs/**'
+      - 'feature/**'
+      - 'refactor/**'
+      - 'test/**'
+  pull_request:
+    branches:
+      - main
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  PROJECT_PATH: 'src/Library.API/Library.API.csproj'
+  TEST_PROJECT_PATH: 'tests/Library.API.Tests/Library.API.Tests.csproj'
+  INTEGRATION_TEST_PROJECT_PATH: 'tests/Library.API.IntegrationTests/Library.API.IntegrationTests.csproj'
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+    
+    - name: Restore dependencies
+      run: dotnet restore ${{ env.PROJECT_PATH }}
+    
+    - name: Build
+      run: dotnet build ${{ env.PROJECT_PATH }} -c Release --no-restore
+    
+    - name: Unit Tests
+      run: |
+        dotnet test ${{ env.TEST_PROJECT_PATH }} \
+        --settings .coverlet.runsettings \
+        /p:CollectCoverage=true \
+        /p:CoverletOutputFormat=opencover \
+        /p:CoverletOutput=./coverage/unit/
+    
+    - name: Integration Tests
+      run: |
+        dotnet test ${{ env.INTEGRATION_TEST_PROJECT_PATH }} \
+        --settings .coverlet.runsettings \
+        /p:CollectCoverage=true \
+        /p:CoverletOutputFormat=opencover \
+        /p:CoverletOutput=./coverage/integration/
+    
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v5
+      with:
+        files: |
+          ./tests/Library.API.Tests/coverage/unit/coverage.opencover.xml
+          ./tests/Library.API.IntegrationTests/coverage/integration/coverage.opencover.xml
+        fail_ci_if_error: true
+        token: ${{ secrets.CODECOV_TOKEN }}
+
