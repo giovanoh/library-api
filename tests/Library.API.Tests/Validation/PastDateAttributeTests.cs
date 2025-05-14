@@ -47,6 +47,18 @@ public class PastDateAttributeTests
         // Assert
         result.Should().BeTrue();
     }
-    
-    
+
+    [Fact]
+    public void IsValid_ShouldReturnFalse_WhenParameterIsNotDate()
+    {
+        // Arrange
+        var attribute = new PastDateAttribute();
+        var date = "not a date";
+
+        // Act
+        var result = attribute.IsValid(date);
+
+        // Assert
+        result.Should().BeFalse();
+    }
 }

@@ -135,8 +135,8 @@ Ensure the API is running (`dotnet run`) before performing any manual tests.
 The commands below will generate a code coverage report in the `coveragereport` directory at the root of the project. You can view the coverage results by opening the `index.html` file in that directory with your web browser.
 
 ```sh
-dotnet test --collect:"XPlat Code Coverage"
-reportgenerator -reports:"tests/**/TestResults/**/coverage.cobertura.xml" -targetdir:coveragereport -reporttypes:Html
+dotnet test --collect:"XPlat Code Coverage" --settings .coverlet.runsettings
+reportgenerator -reports:"tests/**/TestResults/**/coverage.opencover.xml" -targetdir:coveragereport -reporttypes:Html
 ```
 
 ### Project Structure
