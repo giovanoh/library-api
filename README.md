@@ -26,6 +26,7 @@ It simulates a simple library system with authors and books, and is designed for
 - [Manual API Testing](#manual-api-testing)
 - [Running Code Coverage](#running-code-coverage)
 - [Project Structure](#project-structure)
+- [Continuous Integration and Deployment (CI/CD)](#continuous-integration-and-deployment-cicd)
 - [Observability with Jaeger, Prometheus, Loki and Grafana](#observability-with-jaeger-prometheus-loki-and-grafana)
   - [Start all observability services](#start-all-observability-services)
   - [Stop the services](#stop-the-services)
@@ -156,6 +157,48 @@ tests/Library.API.Tests/   # Unit tests
 tests/Library.API.IntegrationTests/ # Integration tests
 observability/             # Observability configs (Grafana dashboards, Prometheus, Loki, provisioning)
 ```
+
+### Continuous Integration and Deployment (CI/CD)
+
+#### Workflow Overview
+
+The project implements a comprehensive and automated Continuous Integration and Continuous Deployment (CI/CD) pipeline using GitHub Actions:
+
+##### Continuous Integration (CI)
+- **Triggers**: 
+  - Pushes to `main` branch
+  - Pushes to `docs/*`, `feature/*`, `refactor/*`, and `test/*` branches
+  - Pull requests to `main` branch
+
+- **Build and Test Process**:
+  - Sets up .NET 8 SDK
+  - Restores project dependencies
+  - Builds the project in Release configuration
+  - Runs comprehensive test suites:
+    - Unit Tests
+    - Integration Tests
+  - Generates code coverage reports
+  - Uploads coverage reports to Codecov for tracking
+
+##### Continuous Deployment (CD)
+- **Trigger**: Successful completion of Continuous Integration workflow on `main` branch
+
+- **Docker Image Publishing**:
+  - Builds a Docker image for the Library API
+  - Publishes image to Docker Hub
+  - Generates multiple tags:
+    - Branch-specific tags
+    - Semantic versioning tags
+    - `latest` tag
+
+#### Key Benefits
+- Automated testing for every code change
+- Consistent build and deployment process
+- Immediate feedback on code quality
+- Automatic Docker image generation
+- Code coverage tracking
+
+**Note**: Deployment requires configured Docker Hub credentials in GitHub Secrets.
 
 ### Observability with Jaeger, Prometheus, Loki and Grafana
 
