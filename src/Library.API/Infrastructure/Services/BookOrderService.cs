@@ -81,14 +81,14 @@ public class BookOrderService : BaseService, IBookOrderService
         }
         catch (DbUpdateException ex)
         {
-            _logger.LogError(ex, "Error occurred while creating book order {BookOrderId}.", bookOrder.Id);
+            _logger.LogError(ex, "Error occurred while saving book order.");
             return ServiceResponse.Fail(
                 "An error occurred while saving the book order",
                 ErrorType.DatabaseError);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while creating book order {BookOrderId}.", bookOrder.Id);
+            _logger.LogError(ex, "Error occurred while adding book order.");
             return ServiceResponse.Fail(
                 "An unexpected error occurred while processing your request",
                 ErrorType.Unknown);

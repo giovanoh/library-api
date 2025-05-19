@@ -40,5 +40,25 @@ public static class TestDataHelper
             AuthorId = 2,
             ReleaseDate = new DateTime(2010, 1, 1),
         }
-    ];    
-} 
+    ];
+
+    public static List<BookOrder> BookOrders =>
+    [
+        new BookOrder
+        {
+            Id = 1,
+            CheckoutDate = new DateTime(2025, 5, 1),
+            Status = BookOrderStatus.Placed,
+            Items = [
+                new BookOrderItem
+                {
+                    Id = 1,
+                    BookId = 1,
+                    Book = Books[0],
+                    Quantity = 1,
+                    BookOrderId = 1
+                }
+            ]
+        }
+    ];
+}

@@ -10,9 +10,11 @@ public class MappingTestsBase
 
     public MappingTestsBase()
     {
-        var configuration = new MapperConfiguration(cfg => {
+        var configuration = new MapperConfiguration(cfg =>
+        {
             cfg.AddProfile<DtoToModelProfile>();
             cfg.AddProfile<ModelToDtoProfile>();
+            cfg.AddProfile<ModelToEventProfile>();
         });
         Mapper = configuration.CreateMapper();
     }
