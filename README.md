@@ -14,6 +14,8 @@ Prototype of a .NET 8 Web API for a Library system
 This project demonstrates how to build a RESTful API using **.NET 8**, following modern best practices for architecture, testing, and maintainability.  
 It simulates a simple library system with authors and books, and is designed for learning and demonstration purposes.
 
+In addition to traditional CRUD operations, the project features an event-driven checkout workflow (EDA) using RabbitMQ and MassTransit, enabling asynchronous order processing and service decoupling.
+
 ## Table of Contents
 
 - [Features & Best Practices](#features--best-practices)
@@ -32,6 +34,10 @@ It simulates a simple library system with authors and books, and is designed for
   - [Stop the services](#stop-the-services)
   - [Observability - Main packages used](#observability---main-packages-used)
   - [Containers summary](#containers-summary)
+- [EDA: Messaging and Event-Driven Architecture](#eda-messaging-and-event-driven-architecture)
+- [Architecture Overview](#architecture-overview)
+- [Example: Checkout Event Flow](#example-checkout-event-flow)
+- [Observability: Tracing & Metrics](#observability-tracing--metrics)
 - [License](#license)
 
 ## Features & Best Practices
@@ -46,6 +52,8 @@ It simulates a simple library system with authors and books, and is designed for
 - **Consistent and centralized error handling** with RFC-compliant `ApiProblemDetails` responses
 - **Unit and integration tests** (xUnit, Moq, FluentAssertions), with mocks to isolate dependencies
 - **Automatic API documentation** with Swagger/OpenAPI
+- **Event-Driven Architecture (EDA)** using RabbitMQ and MassTransit for asynchronous communication between services
+- **Message-based workflow** for checkout and order processing
 - **Separation of concerns** and SOLID principles
 - **Environment-based configuration** via `appsettings.json`
 - **Lowercase URLs** and JSON serialization options for cleaner APIs
@@ -64,17 +72,25 @@ Before running the API for the first time, restore the project dependencies:
 dotnet restore
 ```
 
-### Running the API
-
+### 1. Run Only the API (Authors/Books)
+For quick local development or unit testing of authors and books:
 ```sh
 dotnet run --project src/Library.API/Library.API.csproj
 ```
+The API will be available at https://localhost:5001.
 
-The API will be available at `https://localhost:5001` (or as configured).
+> **Note:** Order/checkout endpoints require RabbitMQ and the full stack running.
+
+### 2. Run the Full Stack (Recommended for Orders/Checkout)
+To test the event-driven order flow, messaging, and observability:
+```sh
+docker compose up --build
+```
+This will start the API, Checkout worker, RabbitMQ, and all observability tools.
 
 ### API Documentation
 
-After running, access Swagger UI at:  
+The API documentation is available via Swagger UI at:
 `https://localhost:5001/swagger`
 
 ### Automated Tests
@@ -129,10 +145,8 @@ Example of manual test workflow in the `.http` file:
 - List books
 - Update a book
 - Remove book and author
-
-#### Additional Tip
-
-Ensure the API is running (`dotnet run`) before performing any manual tests.
+- Create a book order (checkout)
+- Check the status of a book order
 
 ### Running Code Coverage
 
@@ -146,18 +160,20 @@ reportgenerator -reports:"tests/**/TestResults/**/coverage.opencover.xml" -targe
 ### Project Structure
 
 ```
-src/Library.API/           # Main API project
-  Controllers/             # API endpoints
-  Domain/                  # Domain models, repositories, services
-  Infrastructure/          # EF Core context, repositories, services
-  DTOs/                    # Data Transfer Objects
-  Validation/              # Custom validation attributes
-  Mapping/                 # AutoMapper profiles
-tests/Library.API.Tests/   # Unit tests
+src/Library.API/                    # Main API project
+  Controllers/                      # API endpoints
+  Domain/                           # Domain models, repositories, services
+  DTOs/                             # Data Transfer Objects
+  Extensions/                       # Extension methods and helpers
+  Infrastructure/                   # EF Core context, repositories, services, middlewares
+  Mapping/                          # AutoMapper profiles
+  Validation/                       # Custom validation attributes
+src/Library.Events/                 # Event contracts (messages shared between services)
+src/Library.Checkout/               # Worker service for processing order events
+tests/Library.API.Tests/            # Unit tests
 tests/Library.API.IntegrationTests/ # Integration tests
-observability/             # Observability configs (Grafana dashboards, Prometheus, Loki, provisioning)
+observability/                      # Observability configs (Grafana dashboards, Prometheus, Loki, provisioning)
 ```
-
 ### Continuous Integration and Deployment (CI/CD)
 
 #### Workflow Overview
@@ -198,11 +214,9 @@ The project implements a comprehensive and automated Continuous Integration and 
 - Automatic Docker image generation
 - Code coverage tracking
 
-**Note**: Deployment requires configured Docker Hub credentials in GitHub Secrets.
-
 ### Observability with Jaeger, Prometheus, Loki and Grafana
 
-To run the API together with Jaeger, Prometheus, Loki, Promtail, and Grafana, use the `docker-compose.yml` file:
+To run the API together with Jaeger, Prometheus, Loki, Promtail, Grafana, and the Otel Collector, use the `docker-compose.yml` file:
 
 #### Start all observability services
 
@@ -224,6 +238,17 @@ docker compose up --build
 docker compose down
 ```
 
+#### Containers summary
+
+- **otel-collector**: Receives traces, metrics, and logs from the services and forwards them to Jaeger, Prometheus, Loki, and other observability tools.
+- **rabbitmq**: Message broker used for event-driven communication between services (management UI at http://localhost:15672, default user/password: guest/guest).
+- **library-api**: Main .NET API, exposes REST endpoints, metrics, and logs.
+- **jaeger**: Collector and visualizer for distributed traces (OpenTelemetry/Jaeger).
+- **prometheus**: Metrics collector and database, scrapes the API's /metrics endpoint.
+- **loki**: Backend for storing and indexing structured logs.
+- **promtail**: Log collector, reads logs from containers and sends them to Loki.
+- **grafana**: Centralized visualization for metrics, logs, and traces (dashboards, queries, alerts).
+
 #### Observability - Main packages used
 
 - `OpenTelemetry.Exporter.OpenTelemetryProtocol` (for Jaeger via OTLP)
@@ -231,16 +256,54 @@ docker compose down
 - `OpenTelemetry.Extensions.Hosting`
 - `OpenTelemetry.Instrumentation.AspNetCore`
 - `OpenTelemetry.Instrumentation.Http`
+- `OpenTelemetry.Instrumentation.MassTransit` (for distributed tracing of messaging)
 - `Serilog.AspNetCore` and `Serilog.Enrichers.Span` (structured logs)
 
-#### Containers summary
+### Architecture Overview
 
-- **library-api**: Your main .NET API, exposes REST endpoints, metrics, and logs.
-- **jaeger**: Collector and visualizer for distributed traces (OpenTelemetry/Jaeger).
-- **prometheus**: Metrics collector and database, scrapes the API's /metrics endpoint.
-- **loki**: Backend for storing and indexing structured logs.
-- **promtail**: Log collector, reads logs from containers and sends them to Loki.
-- **grafana**: Centralized visualization for metrics, logs, and traces (dashboards, queries, alerts).
+The system is based on Event-Driven Architecture (EDA) using RabbitMQ and MassTransit. The main flow is:
+
+The event-driven workflow relies on RabbitMQ as the central message broker, running as a container in the stack.
+
+```
+[Client] ---> [Library.API] --(OrderPlacedEvent)--> [RabbitMQ] --(OrderPlacedEvent)--> [Library.Checkout]
+    ^             |                                                    |
+    |             |<--(Status events: PaymentConfirmed,                |
+    |             |    OrderProcessing, OrderShipped, OrderDelivered,  |
+    |             |    OrderCompleted, PaymentFailed)                  |
+    |             |                                                    |
+    |<-------------------(Status update via API)-----------------------|
+```
+
+- **Library.API**: Exposes REST endpoints, publishes events to RabbitMQ, and updates order status based on events.
+- **Library.Checkout**: Worker service that consumes events from RabbitMQ, processes business logic (payment, shipping), and emits new events.
+- **Library.Events**: Shared project with event/message contracts.
+
+#### EDA: Messaging and Event-Driven Architecture - Main packages used
+
+- `MassTransit` (core library for distributed application messaging)
+- `MassTransit.RabbitMQ` (RabbitMQ transport for MassTransit)
+- `OpenTelemetry.Instrumentation.MassTransit` (distributed tracing for messaging)
+
+## Example: Checkout Event Flow
+
+Before creating a book order, you need to:
+
+1. Create an Author
+2. Create a Book (using the authorId from the previous response)
+
+After that, you can:
+
+- Create a Book Order (using the bookId from the previous response)
+- The API will publish an OrderPlacedEvent to RabbitMQ
+- The Checkout service will process the event and emit the following events: PaymentConfirmed, PaymentFailed, OrderProcessing, OrderShipped, OrderDelivered, and OrderCompleted.
+- You can check the order status via the API
+
+## Observability: Tracing & Metrics
+
+- **Jaeger**: http://localhost:16686 — visualize distributed traces for each order event.
+- **Grafana**: http://localhost:3000 — dashboards for metrics and traces.
+- **Prometheus**: http://localhost:9090 — raw metrics.
 
 ## License
 

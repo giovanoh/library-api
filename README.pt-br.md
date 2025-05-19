@@ -14,6 +14,8 @@ Protótipo de uma Web API .NET 8 para um sistema de biblioteca
 Este projeto demonstra como construir uma API RESTful usando **.NET 8**, seguindo boas práticas modernas de arquitetura, testes e manutenibilidade.  
 Simula um sistema simples de biblioteca com autores e livros, e foi projetado para fins de aprendizado e demonstração.
 
+Além das operações CRUD tradicionais, o projeto conta com um fluxo de checkout orientado a eventos (EDA) usando RabbitMQ e MassTransit, permitindo processamento assíncrono de pedidos e desacoplamento entre serviços.
+
 ## Sumário
 
 - [Funcionalidades & Boas Práticas](#funcionalidades--boas-práticas)
@@ -32,6 +34,10 @@ Simula um sistema simples de biblioteca com autores e livros, e foi projetado pa
   - [Parar os serviços](#parar-os-serviços)
   - [Observabilidade - Principais pacotes utilizados](#observabilidade---principais-pacotes-utilizados)
   - [Resumo dos containers](#resumo-dos-containers)
+- [EDA: Mensageria e Arquitetura Orientada a Eventos - Principais pacotes utilizados](#eda-mensageria-e-arquitetura-orientada-a-eventos---principais-pacotes-utilizados)
+- [Visão Geral da Arquitetura](#visão-geral-da-arquitetura)
+- [Exemplo: Fluxo de Checkout por Eventos](#exemplo-fluxo-de-checkout-por-eventos)
+- [Observabilidade: Tracing & Métricas](#observabilidade-tracing--métricas)
 - [Licença](#licença)
 
 ## Funcionalidades & Boas Práticas
@@ -46,6 +52,8 @@ Simula um sistema simples de biblioteca com autores e livros, e foi projetado pa
 - **Tratamento de erros consistente e centralizado** com respostas RFC-compliant `ApiProblemDetails`
 - **Testes unitários e de integração** (xUnit, Moq, FluentAssertions), com mocks para isolar dependências
 - **Documentação automática da API** com Swagger/OpenAPI
+- **Arquitetura Orientada a Eventos (EDA)** usando RabbitMQ e MassTransit para comunicação assíncrona entre serviços
+- **Fluxo de checkout baseado em mensagens**
 - **Separação de responsabilidades** e princípios SOLID
 - **Configuração baseada em ambiente** via `appsettings.json`
 - **URLs minúsculas** e opções de serialização JSON para APIs mais limpas
@@ -64,26 +72,26 @@ Antes de rodar a API pela primeira vez, restaure as dependências do projeto:
 dotnet restore
 ```
 
-### Executando a API
-
+### 1. Rodar apenas a API (Autores/Livros)
+Para desenvolvimento local rápido ou testes unitários de autores e livros:
 ```sh
 dotnet run --project src/Library.API/Library.API.csproj
 ```
+A API estará disponível em https://localhost:5001.
 
-A API estará disponível em `https://localhost:5001` (ou conforme configurado).
+> **Nota:** Os endpoints de pedidos/checkout exigem o RabbitMQ e o stack completo em execução.
+
+### 2. Rodar o Stack Completo (Recomendado para Pedidos/Checkout)
+Para testar o fluxo orientado a eventos, mensageria e observabilidade:
+```sh
+docker compose up --build
+```
+Isso irá iniciar a API, o worker Checkout, o RabbitMQ e todas as ferramentas de observabilidade.
 
 ### Documentação da API
 
-Após rodar, acesse o Swagger UI em:  
+A documentação da API está disponível via Swagger UI em:
 `https://localhost:5001/swagger`
-
-### Executando os testes
-
-Os testes unitários e de integração estão localizados no diretório `tests/`.
-
-```sh
-dotnet test
-```
 
 ### Testes Automatizados
 
@@ -137,10 +145,8 @@ Exemplo de fluxo de testes manuais no arquivo `.http`:
 - Listar livros
 - Atualizar livro
 - Remover livro e autor
-
-#### Dica Adicional
-
-Certifique-se de que a API esteja rodando (`dotnet run`) antes de realizar qualquer teste manual.
+- Criar um pedido de livro (checkout)
+- Consultar o andamento do pedido de livro
 
 ### Gerando relatório de cobertura de código
 
@@ -154,16 +160,19 @@ reportgenerator -reports:"tests/**/TestResults/**/coverage.cobertura.xml" -targe
 ### Estrutura do Projeto
 
 ```
-src/Library.API/           # Projeto principal da API
-  Controllers/             # Endpoints da API
-  Domain/                  # Modelos de domínio, repositórios, serviços
-  Infrastructure/          # Contexto EF Core, repositórios, serviços
-  DTOs/                    # Objetos de Transferência de Dados
-  Validation/              # Atributos de validação customizados
-  Mapping/                 # Perfis do AutoMapper
-tests/Library.API.Tests/   # Testes unitários
+src/Library.API/                    # Projeto principal da API
+  Controllers/                      # Endpoints da API
+  Domain/                           # Modelos de domínio, repositórios, serviços
+  DTOs/                             # Objetos de Transferência de Dados
+  Extensions/                       # Métodos de extensão e helpers
+  Infrastructure/                   # Contexto EF Core, repositórios, serviços, middlewares
+  Mapping/                          # Perfis do AutoMapper
+  Validation/                       # Atributos de validação customizados
+src/Library.Events/                 # Contratos de eventos (mensagens compartilhadas entre serviços)
+src/Library.Checkout/               # Serviço worker para processamento de eventos de pedidos
+tests/Library.API.Tests/            # Testes unitários
 tests/Library.API.IntegrationTests/ # Testes de integração
-observability/             # Configurações de observabilidade (dashboards Grafana, Prometheus, Loki, provisionamento)
+observability/                      # Configurações de observabilidade (dashboards Grafana, Prometheus, Loki, provisionamento)
 ```
 
 ### Integração Contínua e Deploy (CI/CD)
@@ -206,11 +215,9 @@ O projeto implementa um pipeline de Integração Contínua e Deploy (CI/CD) abra
 - Geração automática de imagem Docker
 - Rastreamento de cobertura de código
 
-**Nota**: O deploy requer credenciais configuradas do Docker Hub nos Secrets do GitHub.
-
 ### Observabilidade com Jaeger, Prometheus, Loki e Grafana
 
-Para rodar a API junto com Jaeger, Prometheus, Loki, Promtail e Grafana, utilize o arquivo `docker-compose.yml`:
+Para rodar a API junto com Jaeger, Prometheus, Loki, Promtail, Grafana e o Otel Collector, utilize o arquivo `docker-compose.yml`:
 
 #### Subir todos os serviços de observabilidade
 
@@ -232,6 +239,17 @@ docker compose up --build
 docker compose down
 ```
 
+#### Resumo dos containers
+
+- **otel-collector**: Recebe traces, métricas e logs dos serviços e encaminha para o Jaeger, Prometheus, Loki e outras ferramentas de observabilidade.
+- **rabbitmq**: Message broker utilizado para comunicação orientada a eventos entre os serviços (painel de administração em http://localhost:15672, usuário/senha padrão: guest/guest).
+- **library-api**: API .NET principal, expõe endpoints REST, métricas e logs.
+- **jaeger**: Coletor e visualizador de traces distribuídos (OpenTelemetry/Jaeger).
+- **prometheus**: Coletor e banco de dados de métricas, faz scraping do endpoint /metrics da API.
+- **loki**: Backend de armazenamento e indexação de logs estruturados.
+- **promtail**: Coletor de logs, lê logs dos containers e envia para o Loki.
+- **grafana**: Visualização centralizada de métricas, logs e traces (dashboards, queries, alertas).
+
 #### Observabilidade - Principais pacotes utilizados
 
 - `OpenTelemetry.Exporter.OpenTelemetryProtocol` (para Jaeger via OTLP)
@@ -239,17 +257,55 @@ docker compose down
 - `OpenTelemetry.Extensions.Hosting`
 - `OpenTelemetry.Instrumentation.AspNetCore`
 - `OpenTelemetry.Instrumentation.Http`
+- `OpenTelemetry.Instrumentation.MassTransit` (para tracing distribuído de mensageria)
 - `Serilog.AspNetCore` e `Serilog.Enrichers.Span` (logs estruturados)
 
-#### Resumo dos containers
+### Visão Geral da Arquitetura
 
-- **library-api**: Sua API .NET principal, expõe endpoints REST, métricas e logs.
-- **jaeger**: Coletor e visualizador de traces distribuídos (OpenTelemetry/Jaeger).
-- **prometheus**: Coletor e banco de dados de métricas, faz scraping do endpoint /metrics da API.
-- **loki**: Backend de armazenamento e indexação de logs estruturados.
-- **promtail**: Coletor de logs, lê logs dos containers e envia para o Loki.
-- **grafana**: Visualização centralizada de métricas, logs e traces (dashboards, queries, alertas).
+O sistema é baseado em Arquitetura Orientada a Eventos (EDA) usando RabbitMQ e MassTransit. O fluxo principal é:
 
-## Licença
+O fluxo orientado a eventos depende do RabbitMQ como broker central de mensagens, rodando como container no stack.
 
-MIT 
+```
+[Cliente] ---> [Library.API] --(OrderPlacedEvent)--> [RabbitMQ] --(OrderPlacedEvent)--> [Library.Checkout]
+    ^             |                                                    |
+    |             |<--(Eventos de status: PaymentConfirmed,            |
+    |             |    OrderProcessing, OrderShipped, OrderDelivered,  |
+    |             |    OrderCompleted, PaymentFailed)                  |
+    |             |                                                    |
+    |<-------------------(Atualização de status via API)---------------|
+```
+
+- **Library.API**: Expõe endpoints REST, publica eventos no RabbitMQ e atualiza status do pedido conforme eventos.
+- **Library.Checkout**: Serviço worker que consome eventos do RabbitMQ, processa lógica de negócio (pagamento, envio) e emite novos eventos.
+- **Library.Events**: Projeto compartilhado com contratos de eventos/mensagens.
+
+### EDA: Mensageria e Arquitetura Orientada a Eventos - Principais pacotes utilizados
+
+- `MassTransit` (biblioteca principal para mensageria distribuída)
+- `MassTransit.RabbitMQ` (transporte RabbitMQ para o MassTransit)
+- `OpenTelemetry.Instrumentation.MassTransit` (tracing distribuído para mensageria)
+
+### Exemplo: Fluxo de Checkout por Eventos
+
+Antes de criar um pedido de livro, é necessário:
+
+1. Criar um Autor
+2. Criar um Livro (usando o authorId da resposta anterior)
+
+Depois disso, você pode:
+
+- Criar um Pedido de Livro (usando o bookId da resposta anterior)
+- A API irá publicar um OrderPlacedEvent no RabbitMQ
+- O serviço Checkout processará o evento e emitirá os seguintes eventos: PaymentConfirmed, PaymentFailed, OrderProcessing, OrderShipped, OrderDelivered e OrderCompleted.
+- Você pode consultar o status do pedido pela API
+
+### Observabilidade: Tracing & Métricas
+
+- **Jaeger**: http://localhost:16686 — visualize traces distribuídos de cada evento do pedido.
+- **Grafana**: http://localhost:3000 — dashboards de métricas e traces.
+- **Prometheus**: http://localhost:9090 — métricas brutas.
+
+### Licença
+
+MIT
