@@ -15,5 +15,14 @@ public class DtoToModelProfile : Profile
         CreateMap<SaveBookDto, Book>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.Author, opt => opt.Ignore());
+
+        CreateMap<SaveBookOrderDto, BookOrder>()
+            .ForMember(dest => dest.CheckoutDate, opt => opt.Ignore())
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.Status, opt => opt.Ignore());
+        CreateMap<SaveBookOrderItemDto, BookOrderItem>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.Book, opt => opt.Ignore())
+            .ForMember(dest => dest.BookOrderId, opt => opt.Ignore());
     }
 }

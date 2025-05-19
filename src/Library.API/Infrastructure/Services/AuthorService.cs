@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 using Microsoft.EntityFrameworkCore;
 
 using Library.API.Domain.Models;
@@ -10,9 +12,9 @@ namespace Library.API.Infrastructure.Services;
 public class AuthorService : BaseService, IAuthorService
 {
     private readonly IAuthorRepository _authorRepository;
-    private readonly System.Diagnostics.ActivitySource _activitySource;
+    private readonly ActivitySource _activitySource;
 
-    public AuthorService(IAuthorRepository authorRepository, IUnitOfWork unitOfWork, ILogger<AuthorService> logger, System.Diagnostics.ActivitySource activitySource)
+    public AuthorService(IAuthorRepository authorRepository, IUnitOfWork unitOfWork, ILogger<AuthorService> logger, ActivitySource activitySource)
         : base(unitOfWork, logger)
     {
         _authorRepository = authorRepository;

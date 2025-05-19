@@ -17,10 +17,8 @@ public class CorrelationIdMiddleware
     {
         var correlationId = Activity.Current?.TraceId.ToString() ?? Guid.NewGuid().ToString();
 
-        // Adiciona ao contexto de log
         using (LogContext.PushProperty("CorrelationId", correlationId))
         {
-            // Adiciona ao header de resposta
             context.Response.Headers["X-Correlation-Id"] = correlationId;
             await _next(context);
         }
