@@ -2,6 +2,8 @@ using System.Diagnostics;
 using System.Text.Json.Serialization;
 using System.Reflection;
 
+using MassTransit;
+
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -16,11 +18,13 @@ using Serilog.Formatting.Json;
 
 using Library.API.Domain.Repositories;
 using Library.API.Domain.Services;
+using Library.API.Extensions;
 using Library.API.Infrastructure.Contexts;
 using Library.API.Infrastructure.Factories;
+using Library.API.Infrastructure.Middlewares;
 using Library.API.Infrastructure.Repositories;
 using Library.API.Infrastructure.Services;
-using Library.API.Infrastructure.Middlewares;
+using Library.API.Infrastructure.Services.Consumers;
 
 var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
 var appVersion = typeof(Program).Assembly.GetName().Version?.ToString() ?? "unknown";
@@ -70,10 +74,11 @@ builder.Services.AddOpenTelemetry()
             .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("Library.API"))
             .AddAspNetCoreInstrumentation()
             .AddHttpClientInstrumentation()
-            //.AddConsoleExporter()
+            .AddSource("MassTransit")
+            .AddMassTransitInstrumentation()
             .AddOtlpExporter(otlpOptions =>
             {
-                otlpOptions.Endpoint = new Uri("http://jaeger:4317");
+                otlpOptions.Endpoint = new Uri("http://otel-collector:4317");
                 otlpOptions.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
             });
     })
@@ -83,7 +88,11 @@ builder.Services.AddOpenTelemetry()
             .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("Library.API"))
             .AddAspNetCoreInstrumentation()
             .AddHttpClientInstrumentation()
-            .AddPrometheusExporter();
+            .AddOtlpExporter(otlpOptions =>
+            {
+                otlpOptions.Endpoint = new Uri("http://otel-collector:4317");
+                otlpOptions.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+            });
     });
 builder.Services.AddControllers(options =>
     {
@@ -110,9 +119,33 @@ builder.Services.AddScoped<IAuthorService, AuthorService>();
 builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
 builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddScoped<IBookRepository, BookRepository>();
+builder.Services.AddScoped<IBookOrderService, BookOrderService>();
+builder.Services.AddScoped<IBookOrderRepository, BookOrderRepository>();
+
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddSingleton(new ActivitySource("Library.API"));
+
+builder.Services.AddMassTransit(x =>
+{
+    x.WithEndpointSuffix("api")
+        .Add<PaymentConfirmedConsumer>()
+        .Add<PaymentFailedConsumer>()
+        .Add<OrderProcessingConsumer>()
+        .Add<OrderShippedConsumer>()
+        .Add<OrderDeliveredConsumer>()
+        .Add<OrderCompletedConsumer>();
+
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host("rabbitmq", "/", h =>
+        {
+            h.Username("guest");
+            h.Password("guest");
+        });
+        cfg.ConfigureEndpoints(context);
+    });
+});
 
 WebApplication app = builder.Build();
 // Configure the HTTP request pipeline.
@@ -126,7 +159,6 @@ else
 {
     app.UseHttpsRedirection();
 }
-app.UseOpenTelemetryPrometheusScrapingEndpoint();
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.MapControllers();
 app.Run();

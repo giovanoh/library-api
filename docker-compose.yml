@@ -2,7 +2,8 @@ services:
 
   library-api:
     build:
-      context: ./src/Library.API
+      context: .
+      dockerfile: src/Library.API/Dockerfile
     container_name: library-api
     ports:
       - "5001:5001" # HTTPS
@@ -15,14 +16,109 @@ services:
     volumes:
       - ./aspnetapp.pfx:/https/aspnetapp.pfx:ro
     depends_on:
-      - jaeger
+      - rabbitmq
+      - otel-collector
+
+  # Consumes order-placed-event 
+  # Handles the payment
+  # Publishes payment-confirmed-event | payment-failed-event
+  service-payment:
+    build:
+      context: .
+      dockerfile: src/Library.Checkout/Dockerfile
+    container_name: service-payment
+    environment:
+      - PROCESS_STEP=order-placed
+      - DOTNET_ENVIRONMENT=Development
+    depends_on:
+      - library-api
+      - rabbitmq
+      - otel-collector
+
+  # Consumes payment-confirmed-event 
+  # Handles the processing of the order, issuing invoices, etc.
+  # Publishes order-processed-event
+  service-processing:
+    build:
+      context: .
+      dockerfile: src/Library.Checkout/Dockerfile
+    container_name: service-processing
+    environment:
+      - PROCESS_STEP=payment-confirmed
+      - DOTNET_ENVIRONMENT=Development
+    depends_on:
+      - library-api
+      - rabbitmq
+      - otel-collector
+
+  # Consumes order-processed-event
+  # Handles the shipping of the order
+  # Publishes order-shipped-event
+  service-shipping:
+    build:
+      context: .
+      dockerfile: src/Library.Checkout/Dockerfile
+    container_name: service-shipping
+    environment:
+      - PROCESS_STEP=order-processing
+      - DOTNET_ENVIRONMENT=Development
+    depends_on:
+      - library-api
+      - rabbitmq
+      - otel-collector
+
+  # Consumes order-shipped-event
+  # Handles the delivery of the order
+  # Publishes order-delivered-event
+  service-delivery:
+    build:
+      context: .
+      dockerfile: src/Library.Checkout/Dockerfile
+    container_name: service-delivery
+    environment:
+      - PROCESS_STEP=order-shipped
+      - DOTNET_ENVIRONMENT=Development
+    depends_on:
+      - library-api
+      - rabbitmq
+      - otel-collector
+
+  # Consumes order-delivered-event
+  # Handles the completion of the order
+  # Publishes order-completed-event
+  service-completion:
+    build:
+      context: .
+      dockerfile: src/Library.Checkout/Dockerfile
+    container_name: service-completion
+    environment:
+      - PROCESS_STEP=order-delivered
+      - DOTNET_ENVIRONMENT=Development
+    depends_on:
+      - library-api
+      - rabbitmq
+      - otel-collector
 
   jaeger:
     image: jaegertracing/all-in-one:1.69.0
     container_name: jaeger
     ports:
       - "16686:16686" # UI Web
-      - "4317:4317" # OTLP gRPC (OpenTelemetry Protocol)
+      #- "4317:4317" # OTLP gRPC (OpenTelemetry Protocol)
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector
+    command: [ "--config=/etc/otel-collector-config.yaml" ]
+    volumes:
+      - ./observability/collector/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317" # OTLP gRPC (padrão)
+      - "4318:4318" # OTLP HTTP (padrão)
+      - "9464:9464" # Prometheus metrics
+    depends_on:
+      - loki
+      - jaeger
 
   prometheus:
     image: prom/prometheus:latest
@@ -30,22 +126,22 @@ services:
     volumes:
       - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
-      - "9090:9090"
+      - "9090:9090" # UI
     depends_on:
-      - library-api
+      - otel-collector
 
   loki:
     image: grafana/loki:3.5.0
     container_name: loki
     ports:
-      - "3100:3100"
+      - "3100:3100" # API
     command: -config.file=/etc/loki/local-config.yaml
 
   promtail:
     image: grafana/promtail:3.5.0
     container_name: promtail
     ports:
-      - "9080:9080"
+      - "9080:9080" # Status
     volumes:
       - ./observability/loki/promtail-config-wsl.yml:/etc/promtail/config.yml # WSL
       #- ./observability/loki/promtail-config.yml:/etc/promtail/config.yml # Linux nativo
@@ -53,16 +149,27 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     command: -config.file=/etc/promtail/config.yml -log.level=debug
     depends_on:
-      - loki
+      - otel-collector
 
   grafana:
     image: grafana/grafana:10.4.2
     container_name: grafana
     ports:
-      - "3000:3000"
+      - "3000:3000" # UI
     depends_on:
       - prometheus
       - loki
+      - jaeger
     volumes:
       - ./observability/grafana/datasources:/etc/grafana/provisioning/datasources
-      - ./observability/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      #- ./observability/grafana/dashboards:/etc/grafana/provisioning/dashboards
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672" # Application port
+      - "15672:15672" # Admin port
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest

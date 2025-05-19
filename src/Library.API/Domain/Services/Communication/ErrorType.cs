@@ -6,5 +6,6 @@ public enum ErrorType
     ValidationError,
     DatabaseError,
     Conflict,
+    MessageBrokerError,
     Unknown
-} 
+}

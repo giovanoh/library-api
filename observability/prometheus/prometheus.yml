@@ -1,8 +1,13 @@
 global:
   scrape_interval: 5s
+  evaluation_interval: 15s
 
 scrape_configs:
-  - job_name: 'library-api'
-    metrics_path: /metrics
+  # - job_name: 'library-api'
+  #   metrics_path: /metrics
+  #   static_configs:
+  #     - targets: ['library-api:5000']  # Endpoint /metrics da API
+
+  - job_name: 'otel-collector'
     static_configs:
-      - targets: ['library-api:5000'] 
+      - targets: ['otel-collector:9464']  # Endpoint de métricas do Collector (sem path) 

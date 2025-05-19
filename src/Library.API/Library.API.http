@@ -66,4 +66,23 @@ Accept: application/json
 DELETE {{Library_API_HostAddress}}/api/authors/{{AuthorId}}
 Accept: application/json
 
-###
+### 9 - Criar um book order
+# @name CreateBookOrder
+@BookId = {{CreateBook.response.body.data.id}}
+POST {{Library_API_HostAddress}}/api/checkout
+Content-Type: application/json
+Accept: application/json
+
+{
+  "items": [
+    {
+      "bookId": {{BookId}},
+      "quantity": 1
+    }
+  ]
+}
+
+### 10 - Consultar o andamento do book order
+@BookOrderId = {{CreateBookOrder.response.body.data.id}}
+GET {{Library_API_HostAddress}}/api/checkout/{{BookOrderId}}
+Accept: application/json
