@@ -13,12 +13,11 @@ using Library.API.Tests.Helpers;
 
 namespace Library.API.Tests.Services;
 
-public class BookServiceTests
+public class BookServiceTests : ServiceTestBase<BookService>
 {
     private readonly Mock<IBookRepository> _bookRepositoryMock;
     private readonly Mock<IAuthorRepository> _authorRepositoryMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
-    private readonly Mock<ILogger<BookService>> _loggerMock;
     private readonly ActivitySource _activitySource;
 
     public BookServiceTests()
@@ -26,12 +25,11 @@ public class BookServiceTests
         _bookRepositoryMock = new Mock<IBookRepository>();
         _authorRepositoryMock = new Mock<IAuthorRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
-        _loggerMock = new Mock<ILogger<BookService>>();
         _activitySource = new ActivitySource("Library.API.Tests");
     }
 
     private BookService CreateService() =>
-        new BookService(_bookRepositoryMock.Object, _authorRepositoryMock.Object, _unitOfWorkMock.Object, _loggerMock.Object, _activitySource);
+        new BookService(_bookRepositoryMock.Object, _authorRepositoryMock.Object, _unitOfWorkMock.Object, LoggerMock.Object, _activitySource);
 
     [Fact]
     public async Task ListAsync_ShouldReturnBooks_WhenSuccessful()
@@ -74,16 +72,7 @@ public class BookServiceTests
         result.Message.Should().Be("An error occurred while retrieving the books");
 
         _bookRepositoryMock.Verify(repo => repo.ListAsync(), Times.Once);
-        _loggerMock.Verify(
-            static x => x.Log(
-                LogLevel.Error,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v!.ToString()!.Contains("Error occurred while listing books")),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()
-            ),
-            Times.Once
-        );
+        VerifyErrorLog("Error occurred while listing books");
     }
 
     [Fact]
@@ -150,16 +139,7 @@ public class BookServiceTests
         result.Message.Should().Be("An error occurred while retrieving the book");
 
         _bookRepositoryMock.Verify(repo => repo.FindByIdAsync(book.Id), Times.Once);
-        _loggerMock.Verify(
-            x => x.Log(
-                LogLevel.Error,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v!.ToString()!.Contains("Error occurred while finding book")),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()
-            ),
-            Times.Once
-        );
+        VerifyErrorLog("Error occurred while finding book");
     }
 
     [Fact]
@@ -213,16 +193,7 @@ public class BookServiceTests
         _bookRepositoryMock.Verify(repo => repo.AddAsync(book), Times.Once);
         _authorRepositoryMock.Verify(repo => repo.FindByIdAsync(book.AuthorId), Times.Once);
         _unitOfWorkMock.Verify(uow => uow.CompleteAsync(), Times.Never);
-        _loggerMock.Verify(
-            x => x.Log(
-                LogLevel.Error,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v!.ToString()!.Contains("Error occurred while saving book")),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()
-            ),
-            Times.Once
-        );
+        VerifyErrorLog("Error occurred while saving book");
     }
 
     [Fact]
@@ -250,16 +221,7 @@ public class BookServiceTests
         _bookRepositoryMock.Verify(repo => repo.AddAsync(book), Times.Once);
         _authorRepositoryMock.Verify(repo => repo.FindByIdAsync(book.AuthorId), Times.Once);
         _unitOfWorkMock.Verify(uow => uow.CompleteAsync(), Times.Once);
-        _loggerMock.Verify(
-            x => x.Log(
-                LogLevel.Error,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v!.ToString()!.Contains("Error occurred while saving book")),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()
-            ),
-            Times.Once
-        );
+        VerifyErrorLog("Error occurred while saving book");
     }
 
     [Fact]
@@ -286,16 +248,7 @@ public class BookServiceTests
         _bookRepositoryMock.Verify(repo => repo.AddAsync(book), Times.Once);
         _authorRepositoryMock.Verify(repo => repo.FindByIdAsync(book.AuthorId), Times.Once);
         _unitOfWorkMock.Verify(uow => uow.CompleteAsync(), Times.Never);
-        _loggerMock.Verify(
-            x => x.Log(
-                LogLevel.Error,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v!.ToString()!.Contains("Unexpected error occurred while adding book.")),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()
-            ),
-            Times.Once
-        );
+        VerifyErrorLog("Unexpected error occurred while adding book.");
     }
 
     [Fact]
@@ -426,16 +379,7 @@ public class BookServiceTests
         _bookRepositoryMock.Verify(repo => repo.Update(book), Times.Once);
         _authorRepositoryMock.Verify(repo => repo.FindByIdAsync(book.AuthorId), Times.Once);
         _unitOfWorkMock.Verify(uow => uow.CompleteAsync(), Times.Never);
-        _loggerMock.Verify(
-            x => x.Log(
-                LogLevel.Error,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v!.ToString()!.Contains("Error occurred while updating book")),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()
-            ),
-            Times.Once
-        );
+        VerifyErrorLog("Error occurred while updating book");
     }
 
     [Fact]
@@ -463,16 +407,7 @@ public class BookServiceTests
         _bookRepositoryMock.Verify(repo => repo.FindByIdAsync(book.Id), Times.Once);
         _bookRepositoryMock.Verify(repo => repo.Update(book), Times.Once);
         _unitOfWorkMock.Verify(uow => uow.CompleteAsync(), Times.Never);
-        _loggerMock.Verify(
-            x => x.Log(
-                LogLevel.Error,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v!.ToString()!.Contains("Unexpected error occurred while updating book")),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()
-            ),
-            Times.Once
-        );
+        VerifyErrorLog("Unexpected error occurred while updating book");
     }
 
     [Fact]
@@ -548,16 +483,7 @@ public class BookServiceTests
         _bookRepositoryMock.Verify(repo => repo.FindByIdAsync(book.Id), Times.Once);
         _bookRepositoryMock.Verify(repo => repo.Delete(book), Times.Once);
         _unitOfWorkMock.Verify(uow => uow.CompleteAsync(), Times.Never);
-        _loggerMock.Verify(
-            x => x.Log(
-                LogLevel.Error,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v!.ToString()!.Contains("Error occurred while deleting book")),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()
-            ),
-            Times.Once
-        );
+        VerifyErrorLog("Error occurred while deleting book");
     }
 
     [Fact]
@@ -583,15 +509,6 @@ public class BookServiceTests
         _bookRepositoryMock.Verify(repo => repo.FindByIdAsync(book.Id), Times.Once);
         _bookRepositoryMock.Verify(repo => repo.Delete(book), Times.Once);
         _unitOfWorkMock.Verify(uow => uow.CompleteAsync(), Times.Never);
-        _loggerMock.Verify(
-            x => x.Log(
-                LogLevel.Error,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v!.ToString()!.Contains("Unexpected error occurred while deleting book")),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()
-            ),
-            Times.Once
-        );
+        VerifyErrorLog("Unexpected error occurred while deleting book");
     }
 }

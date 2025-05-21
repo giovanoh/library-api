@@ -101,6 +101,51 @@ public static class TestDataHelper
         dbContext.SaveChanges();
     }
 
+    private static BookOrder[] GetDefaultBookOrders() =>
+    [
+        new BookOrder
+        {
+            Id = 1,
+            CheckoutDate = new DateTime(2020, 1, 1),
+            Status = BookOrderStatus.Placed,
+            Items = [
+                new BookOrderItem
+                {
+                    Id = 1,
+                    BookId = 1,
+                    Quantity = 1,
+                }
+            ]
+        }
+    ];
+
+    public static void SeedBookOrders(LibraryApiFactory factory, bool resetDatabase = false)
+    {
+        var bookOrders = GetDefaultBookOrders();
+        WithDbContext(factory, dbContext =>
+        {
+            SeedBookOrdersInternal(dbContext, bookOrders, resetDatabase);
+        });
+    }
+
+    public static void SeedBookOrders(ApiDbContext dbContext, bool resetDatabase = false)
+    {
+        var bookOrders = GetDefaultBookOrders();
+        SeedBookOrdersInternal(dbContext, bookOrders, resetDatabase);
+    }
+
+    private static void SeedBookOrdersInternal(ApiDbContext dbContext, BookOrder[] bookOrders, bool resetDatabase = false)
+    {
+        if (resetDatabase)
+        {
+            dbContext.Database.EnsureDeleted();
+        }
+        dbContext.Database.EnsureCreated();
+
+        dbContext.BookOrders.AddRange(bookOrders);
+        dbContext.SaveChanges();
+    }
+
     private static void WithDbContext(LibraryApiFactory factory, Action<ApiDbContext> action)
     {
         using IServiceScope scope = factory.Services.CreateScope();

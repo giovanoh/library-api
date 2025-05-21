@@ -1,4 +1,5 @@
 using MassTransit;
+
 using Library.API.Domain.Models;
 using Library.API.Domain.Services;
 using Library.Events.Messages;

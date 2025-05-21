@@ -1,4 +1,5 @@
 using System.Diagnostics;
+
 using Microsoft.EntityFrameworkCore;
 
 using Library.API.Domain.Models;
@@ -22,7 +23,6 @@ public class BookOrderRepository : IBookOrderRepository
     {
         using var activity = _activitySource.StartActivity("Repository: BookOrderRepository.AddAsync");
         await _context.BookOrders.AddAsync(bookOrder);
-        await _context.SaveChangesAsync();
     }
 
     public async Task<BookOrder?> FindByIdAsync(int id)
