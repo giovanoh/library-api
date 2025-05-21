@@ -1,8 +1,10 @@
 using System.Diagnostics;
 
 using AutoMapper;
-
 using FluentAssertions;
+using MassTransit;
+using Microsoft.EntityFrameworkCore;
+using Moq;
 
 using Library.API.Domain.Models;
 using Library.API.Domain.Repositories;
@@ -11,20 +13,13 @@ using Library.API.Infrastructure.Services;
 using Library.API.Tests.Helpers;
 using Library.Events.Messages;
 
-using MassTransit;
-
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-
-using Moq;
-
 namespace Library.API.Tests.Services;
 
-public class BookOrderServiceTests
+public class BookOrderServiceTests : ServiceTestBase<BookOrderService>
 {
     private readonly Mock<IBookOrderRepository> _bookOrderRepositoryMock;
+    private readonly Mock<IBookRepository> _bookRepositoryMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
-    private readonly Mock<ILogger<BookOrderService>> _loggerMock;
     private readonly ActivitySource _activitySource;
     private readonly Mock<IMapper> _mapperMock;
     private readonly Mock<IPublishEndpoint> _publishEndpointMock;
@@ -32,8 +27,8 @@ public class BookOrderServiceTests
     public BookOrderServiceTests()
     {
         _bookOrderRepositoryMock = new Mock<IBookOrderRepository>();
+        _bookRepositoryMock = new Mock<IBookRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
-        _loggerMock = new Mock<ILogger<BookOrderService>>();
         _activitySource = new ActivitySource("Library.API.Tests");
         _mapperMock = new Mock<IMapper>();
         _publishEndpointMock = new Mock<IPublishEndpoint>();
@@ -42,8 +37,9 @@ public class BookOrderServiceTests
     private BookOrderService CreateService() =>
         new BookOrderService(
             _bookOrderRepositoryMock.Object,
+            _bookRepositoryMock.Object,
             _unitOfWorkMock.Object,
-            _loggerMock.Object,
+            LoggerMock.Object,
             _activitySource,
             _mapperMock.Object,
             _publishEndpointMock.Object);
@@ -131,16 +127,7 @@ public class BookOrderServiceTests
         result.Message.Should().Be("An error occurred while retrieving the book order");
 
         _bookOrderRepositoryMock.Verify(repo => repo.FindByIdAsync(bookOrderId), Times.Once);
-        _loggerMock.Verify(
-            x => x.Log(
-                LogLevel.Error,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v!.ToString()!.Contains("Error occurred while finding book order")),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()
-            ),
-            Times.Once
-        );
+        VerifyErrorLog("Error occurred while finding book order");
     }
 
     [Fact]
@@ -150,9 +137,12 @@ public class BookOrderServiceTests
         var bookOrderService = CreateService();
         var bookOrder = TestDataHelper.BookOrders[0];
         var bookOrderId = bookOrder.Id;
+        var book = bookOrder.Items[0].Book;
+        var bookId = book.Id;
 
         _bookOrderRepositoryMock.Setup(repo => repo.AddAsync(bookOrder)).Returns(Task.CompletedTask);
         _bookOrderRepositoryMock.Setup(repo => repo.FindByIdAsync(bookOrderId)).ReturnsAsync(bookOrder);
+        _bookRepositoryMock.Setup(repo => repo.FindByIdAsync(bookId)).ReturnsAsync(book);
         _unitOfWorkMock.Setup(uow => uow.CompleteAsync()).Returns(Task.CompletedTask);
         _publishEndpointMock.Setup(publishEndpoint => publishEndpoint.Publish(It.IsAny<OrderPlacedEvent>(), CancellationToken.None)).Returns(Task.CompletedTask);
 
@@ -179,8 +169,11 @@ public class BookOrderServiceTests
         var bookOrderService = CreateService();
         var bookOrder = TestDataHelper.BookOrders[0];
         var bookOrderId = bookOrder.Id;
+        var book = bookOrder.Items[0].Book;
+        var bookId = book.Id;
 
         _bookOrderRepositoryMock.Setup(repo => repo.AddAsync(bookOrder)).ThrowsAsync(new DbUpdateException("Repository error"));
+        _bookRepositoryMock.Setup(repo => repo.FindByIdAsync(bookId)).ReturnsAsync(book);
 
         // Act
         var result = await bookOrderService.AddAsync(bookOrder);
@@ -197,16 +190,7 @@ public class BookOrderServiceTests
         _bookOrderRepositoryMock.Verify(repo => repo.AddAsync(bookOrder), Times.Once);
         _unitOfWorkMock.Verify(uow => uow.CompleteAsync(), Times.Never);
         _publishEndpointMock.Verify(publishEndpoint => publishEndpoint.Publish(It.IsAny<OrderPlacedEvent>(), CancellationToken.None), Times.Never);
-        _loggerMock.Verify(
-            x => x.Log(
-                LogLevel.Error,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v!.ToString()!.Contains("Error occurred while saving book order.")),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()
-            ),
-            Times.Once
-        );
+        VerifyErrorLog("Error occurred while saving book order");
     }
 
     [Fact]
@@ -216,9 +200,12 @@ public class BookOrderServiceTests
         var bookOrderService = CreateService();
         var bookOrder = TestDataHelper.BookOrders[0];
         var bookOrderId = bookOrder.Id;
+        var book = bookOrder.Items[0].Book;
+        var bookId = book.Id;
 
         _bookOrderRepositoryMock.Setup(repo => repo.AddAsync(bookOrder)).Returns(Task.CompletedTask);
         _bookOrderRepositoryMock.Setup(repo => repo.FindByIdAsync(bookOrderId)).ReturnsAsync(bookOrder);
+        _bookRepositoryMock.Setup(repo => repo.FindByIdAsync(bookId)).ReturnsAsync(book);
         _unitOfWorkMock.Setup(uow => uow.CompleteAsync()).ThrowsAsync(new DbUpdateException("Unit of work error"));
 
         // Act
@@ -245,9 +232,12 @@ public class BookOrderServiceTests
         var bookOrderService = CreateService();
         var bookOrder = TestDataHelper.BookOrders[0];
         var bookOrderId = bookOrder.Id;
+        var book = bookOrder.Items[0].Book;
+        var bookId = book.Id;
 
         _bookOrderRepositoryMock.Setup(repo => repo.AddAsync(bookOrder)).Returns(Task.CompletedTask);
         _bookOrderRepositoryMock.Setup(repo => repo.FindByIdAsync(bookOrderId)).ReturnsAsync(bookOrder);
+        _bookRepositoryMock.Setup(repo => repo.FindByIdAsync(bookId)).ReturnsAsync(book);
         _unitOfWorkMock.Setup(uow => uow.CompleteAsync()).ThrowsAsync(new Exception("Unexpected error"));
 
         // Act
@@ -299,9 +289,12 @@ public class BookOrderServiceTests
         var bookOrderService = CreateService();
         var bookOrder = TestDataHelper.BookOrders[0];
         var bookOrderId = bookOrder.Id;
+        var book = bookOrder.Items[0].Book;
+        var bookId = book.Id;
 
         _bookOrderRepositoryMock.Setup(repo => repo.AddAsync(bookOrder)).Returns(Task.CompletedTask);
         _bookOrderRepositoryMock.Setup(repo => repo.FindByIdAsync(bookOrderId)).ReturnsAsync(bookOrder);
+        _bookRepositoryMock.Setup(repo => repo.FindByIdAsync(bookId)).ReturnsAsync(book);
         _unitOfWorkMock.Setup(uow => uow.CompleteAsync()).Returns(Task.CompletedTask);
         _publishEndpointMock
             .Setup(publishEndpoint => publishEndpoint.Publish(It.IsAny<OrderPlacedEvent>(), CancellationToken.None))
@@ -323,16 +316,7 @@ public class BookOrderServiceTests
         _bookOrderRepositoryMock.Verify(repo => repo.FindByIdAsync(bookOrderId), Times.Once);
         _unitOfWorkMock.Verify(uow => uow.CompleteAsync(), Times.Once);
         _publishEndpointMock.Verify(publishEndpoint => publishEndpoint.Publish(It.IsAny<OrderPlacedEvent>(), CancellationToken.None), Times.Once);
-        _loggerMock.Verify(
-            x => x.Log(
-                LogLevel.Error,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v!.ToString()!.Contains("Error occurred while publishing order placed event")),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()
-            ),
-            Times.Once
-        );
+        VerifyErrorLog("Error occurred while publishing order placed event");
     }
 
     [Fact]
@@ -414,15 +398,6 @@ public class BookOrderServiceTests
 
         _bookOrderRepositoryMock.Verify(repo => repo.FindByIdAsync(bookOrderId), Times.Once);
         _unitOfWorkMock.Verify(uow => uow.CompleteAsync(), Times.Once);
-        _loggerMock.Verify(
-            x => x.Log(
-                LogLevel.Error,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v!.ToString()!.Contains("Error occurred while updating status for book order")),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()
-            ),
-            Times.Once
-        );
+        VerifyErrorLog("Error occurred while updating status for book order");
     }
 }

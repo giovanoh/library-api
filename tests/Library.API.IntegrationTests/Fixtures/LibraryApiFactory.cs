@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
+using MassTransit;
+using Moq;
+
 using Library.API.Infrastructure.Contexts;
 
 namespace Library.API.IntegrationTests.Fixtures;
@@ -11,20 +14,30 @@ namespace Library.API.IntegrationTests.Fixtures;
 public class LibraryApiFactory : WebApplicationFactory<Program>
 {
     private readonly string _databaseName = $"library_api_test_db_{Guid.NewGuid()}";
+    private Mock<IPublishEndpoint> _publishEndpointMock = new();
+
+    public Mock<IPublishEndpoint> GetPublishEndpointMock() => _publishEndpointMock;
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
         builder.ConfigureServices(services =>
         {
-            var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(ApiDbContext));
-            if (descriptor != null)
+            var dbDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(ApiDbContext));
+            if (dbDescriptor != null)
             {
-                services.Remove(descriptor);
+                services.Remove(dbDescriptor);
                 services.AddDbContext<ApiDbContext>(options =>
                 {
                     options.UseInMemoryDatabase(_databaseName);
                 });
+            }
+
+            var massTransitDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IPublishEndpoint));
+            if (massTransitDescriptor != null)
+            {
+                services.Remove(massTransitDescriptor);
+                services.AddSingleton(_publishEndpointMock.Object);
             }
 
             var sp = services.BuildServiceProvider();

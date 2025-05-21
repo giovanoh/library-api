@@ -16,12 +16,14 @@ namespace Library.API.Infrastructure.Services;
 public class BookOrderService : BaseService, IBookOrderService
 {
     private readonly IBookOrderRepository _bookOrderRepository;
+    private readonly IBookRepository _bookRepository;
     private readonly ActivitySource _activitySource;
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly IMapper _mapper;
 
     public BookOrderService(
         IBookOrderRepository bookOrderRepository,
+        IBookRepository bookRepository,
         IUnitOfWork unitOfWork,
         ILogger<BookOrderService> logger,
         ActivitySource activitySource,
@@ -30,6 +32,7 @@ public class BookOrderService : BaseService, IBookOrderService
         : base(unitOfWork, logger)
     {
         _bookOrderRepository = bookOrderRepository;
+        _bookRepository = bookRepository;
         _activitySource = activitySource;
         _mapper = mapper;
         _publishEndpoint = publishEndpoint;
@@ -61,6 +64,13 @@ public class BookOrderService : BaseService, IBookOrderService
         {
             if (bookOrder.Items.Count == 0)
                 return ServiceResponse.Fail("Book order must have at least one item", ErrorType.ValidationError);
+
+            foreach (var item in bookOrder.Items)
+            {
+                var book = await _bookRepository.FindByIdAsync(item.BookId);
+                if (book == null)
+                    return ServiceResponse.Fail($"Book with id {item.BookId} was not found", ErrorType.ValidationError);
+            }
 
             await _bookOrderRepository.AddAsync(bookOrder);
             await _unitOfWork.CompleteAsync();

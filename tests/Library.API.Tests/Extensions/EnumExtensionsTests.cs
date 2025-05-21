@@ -52,5 +52,18 @@ public class EnumExtensionsTests
         secondDescription.Should().Be("Second");
         thirdDescription.Should().Be("Third");
     }
+
+    [Fact]
+    public void ToDescription_ShouldReturnValueToString_WhenEnumValueIsInvalid()
+    {
+        // Arrange
+        var invalidValue = (TestEnumWithoutDescription)999;
+
+        // Act
+        var description = invalidValue.ToDescription();
+
+        // Assert
+        description.Should().Be("999");
+    }
 }
 
