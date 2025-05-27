@@ -1,5 +1,6 @@
 [![Continuous Integration](https://github.com/giovanoh/library-api/actions/workflows/ci.yml/badge.svg)](https://github.com/giovanoh/library-api/actions/workflows/ci.yml)
 [![Continuous Deployment](https://github.com/giovanoh/library-api/actions/workflows/cd.yml/badge.svg)](https://github.com/giovanoh/library-api/actions/workflows/cd.yml)
+[![codecov](https://codecov.io/gh/giovanoh/library-api/branch/main/graph/badge.svg)](https://app.codecov.io/gh/giovanoh/library-api)
 
 ---
 
