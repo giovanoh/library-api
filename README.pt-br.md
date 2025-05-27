@@ -57,6 +57,8 @@ Além das operações CRUD tradicionais, o projeto conta com um fluxo de checkou
 - **Separação de responsabilidades** e princípios SOLID
 - **Configuração baseada em ambiente** via `appsettings.json`
 - **URLs minúsculas** e opções de serialização JSON para APIs mais limpas
+- **Modelo de Maturidade de Richardson**: Esta API atinge o **Nível 2** do Modelo de Maturidade de Richardson, ou seja, utiliza recursos distintos e os verbos HTTP adequados (GET, POST, PUT, DELETE) para cada operação. Ainda não implementa HATEOAS (Nível 3), que incluiria links hipermídia nas respostas para guiar o cliente de forma dinâmica. Veja mais em [Modelo de Maturidade de Richardson](https://martinfowler.com/articles/richardsonMaturityModel.html).
+- **Padrão de Resposta Unificado**: Todas as respostas de sucesso seguem o formato `ApiResponse<T>`, garantindo consistência e previsibilidade para quem consome a API. Todas as respostas de erro seguem o padrão [RFC 7807](https://datatracker.ietf.org/doc/html/rfc7807) utilizando o objeto `ApiProblemDetails`, facilitando o tratamento de erros de forma padronizada e interoperável.
 
 ## Primeiros Passos
 
