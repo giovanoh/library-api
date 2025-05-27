@@ -57,6 +57,8 @@ In addition to traditional CRUD operations, the project features an event-driven
 - **Separation of concerns** and SOLID principles
 - **Environment-based configuration** via `appsettings.json`
 - **Lowercase URLs** and JSON serialization options for cleaner APIs
+- **Richardson Maturity Model**: This API reaches **Level 2** of the Richardson Maturity Model, meaning it uses distinct resources and proper HTTP verbs (GET, POST, PUT, DELETE) for each operation. However, it does not yet implement HATEOAS (Level 3), which would include hypermedia links in responses to guide clients dynamically. See [Richardson Maturity Model](https://martinfowler.com/articles/richardsonMaturityModel.html) for more details.
+- **Unified Response Pattern**: All successful responses follow the `ApiResponse<T>` format, ensuring consistency and predictability for API consumers. All error responses follow the [RFC 7807](https://datatracker.ietf.org/doc/html/rfc7807) standard using the `ApiProblemDetails` object, making error handling standardized and interoperable.
 
 ## Getting Started
 
@@ -174,6 +176,7 @@ tests/Library.API.Tests/            # Unit tests
 tests/Library.API.IntegrationTests/ # Integration tests
 observability/                      # Observability configs (Grafana dashboards, Prometheus, Loki, provisioning)
 ```
+
 ### Continuous Integration and Deployment (CI/CD)
 
 #### Workflow Overview
